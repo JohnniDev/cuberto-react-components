@@ -1,0 +1,30 @@
+{
+  "name": "cuberto-react-components",
+  "version": "0.0.1",
+  "description": "Cuberto React Components Library",
+  "main": "dist/build.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JohnniDev/cuberto-react-components"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode production"
+  },
+  "author": "Evgeniy Kondrashov",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/plugin-proposal-class-properties": "^7.4.0",
+    "babel-loader": "^8.0.5",
+    "webpack": "^4.28.3",
+    "webpack-cli": "^3.2.0"
+  },
+  "dependencies": {
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
+    "prop-types": "latest"
+  }
+}
