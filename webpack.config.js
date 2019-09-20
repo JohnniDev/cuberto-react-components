@@ -22,5 +22,6 @@ module.exports = {
         publicPath: '',
         filename: 'build.js',
         libraryTarget: 'umd'
-    }
+    },
+    watch: true,
 };
