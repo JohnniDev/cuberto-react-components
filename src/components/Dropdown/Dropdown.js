@@ -1,36 +1,39 @@
 // @flow
-import React, {Component} from 'react';
+/* eslint-disable react/no-array-index-key */
+import React, { Component } from 'react';
 
 type Props = {
-    options: Array<any>,
+  options: Array<any>,
 };
 
 type State = {
-    options: Array<any>,
+  options: Array<any>,
 };
 
 class Dropdown extends Component<Props, State> {
-    constructor(props: Props) {
-        super(props);
+  constructor(props: Props) {
+    super(props);
 
-        this.state = {
-            options: props.options || [],
-        };
-    }
+    this.state = {
+      options: props.options || [],
+    };
+  }
 
-    render() {
-        const options = this.state.options.map((option, idx) =>
-            <div key={idx}>
-                <li>{option.name}</li>
-            </div>
-        );
+  render() {
+    const { options } = this.state;
 
-        return (
-            <div>
-                <ul>{options}</ul>
-            </div>
-        );
-    }
+    const items = options.map(({ name }, idx) => (
+      <div key={idx}>
+        <li>{name}</li>
+      </div>
+    ));
+
+    return (
+      <div>
+        <ul>{items}</ul>
+      </div>
+    );
+  }
 }
 
 export default Dropdown;

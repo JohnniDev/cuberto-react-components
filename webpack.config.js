@@ -13,7 +13,7 @@ module.exports = {
                 test: /\.js[x]?$/,
                 include: path.resolve(__dirname, 'src'),
                 exclude: /node_modules/,
-                loader: 'babel-loader'
+                use: ['babel-loader', 'eslint-loader'],
             },
         ],
     },
