@@ -1,7 +1,16 @@
+// @flow
 import React, {Component} from 'react';
 
-class Dropdown extends Component {
-    constructor(props) {
+type Props = {
+    options: Array<any>,
+};
+
+type State = {
+    options: Array<any>,
+};
+
+class Dropdown extends Component<Props, State> {
+    constructor(props: Props) {
         super(props);
 
         this.state = {
