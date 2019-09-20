@@ -1,0 +1,34 @@
+{
+  "name": "cuberto-react-components-demos",
+  "version": "0.0.1",
+  "description": "Cuberto React Components Demos",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack-dev-server --devtool eval --progress --hot --content-base dist",
+    "build": "webpack --mode production"
+  },
+  "author": "Evgeniy Kondrashov",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-proposal-class-properties": "^7.4.0",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.5",
+    "babel-preset-react": "^6.24.1",
+    "copy-webpack-plugin": "^5.0.4",
+    "css-loader": "^3.2.0",
+    "open-browser-webpack-plugin": "0.0.5",
+    "style-loader": "^1.0.0",
+    "webpack": "^4.28.3",
+    "webpack-cli": "^3.2.0",
+    "webpack-dev-server": "^3.8.1"
+  },
+  "dependencies": {
+    "bulma": "^0.7.5",
+    "prop-types": "latest",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
+    "react-router-dom": "^5.0.1"
+  }
+}
