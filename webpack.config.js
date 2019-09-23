@@ -3,28 +3,28 @@ const path = require('path');
 const env = process.env.NODE_ENV;
 
 module.exports = {
-    entry: './src/index.js',
-    mode: env,
-    module: {
-        rules: [
-            {
-                test: /\.css$/,
-                include: path.resolve(__dirname, 'src'),
-                loader: 'style-loader!css-loader'
-            },
-            {
-                test: /\.js[x]?$/,
-                include: path.resolve(__dirname, 'src'),
-                exclude: /node_modules/,
-                use: ['babel-loader', 'eslint-loader'],
-            },
-        ],
-    },
-    output: {
-        path: path.resolve(__dirname, 'dist/'),
-        publicPath: '',
-        filename: 'build.js',
-        libraryTarget: 'umd'
-    },
-    watch: env === 'development',
+  entry: './src/index.js',
+  mode: env,
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        include: path.resolve(__dirname, 'src'),
+        loader: 'style-loader!css-loader',
+      },
+      {
+        test: /\.js[x]?$/,
+        include: path.resolve(__dirname, 'src'),
+        exclude: /node_modules/,
+        use: ['babel-loader', 'eslint-loader'],
+      },
+    ],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist/'),
+    publicPath: '',
+    filename: 'build.js',
+    libraryTarget: 'umd',
+  },
+  watch: env === 'development',
 };

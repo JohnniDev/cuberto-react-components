@@ -1,4 +1,6 @@
 [ignore]
+    ./example/**/*
+    .*/node_modules/.*
 
 [include]
 

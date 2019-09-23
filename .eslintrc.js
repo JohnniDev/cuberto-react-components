@@ -8,37 +8,24 @@ const prettierOptions = JSON.parse(
 module.exports = {
   parser: 'babel-eslint',
   extends: ['airbnb', 'prettier', 'prettier/react'],
+  plugins: ['prettier', 'react', 'jsx-a11y'],
   env: {
+    jest: true,
     browser: true,
+    node: true,
     es6: true,
   },
-  globals: {
-    Atomics: 'readonly',
-    SharedArrayBuffer: 'readonly',
-  },
   parserOptions: {
+    ecmaVersion: 6,
+    sourceType: 'module',
     ecmaFeatures: {
       jsx: true,
     },
-    ecmaVersion: 2018,
-    sourceType: 'module',
   },
-  plugins: [
-    'prettier',
-    'react',
-  ],
   rules: {
     'prettier/prettier': ['error', prettierOptions],
     'arrow-body-style': [2, 'as-needed'],
     'class-methods-use-this': 0,
-    'import/imports-first': 0,
-    'import/newline-after-import': 0,
-    'import/no-dynamic-require': 0,
-    'import/no-extraneous-dependencies': 0,
-    'import/no-named-as-default': 0,
-    'import/no-unresolved': 2,
-    'import/no-webpack-loader-syntax': 0,
-    'import/prefer-default-export': 0,
     indent: [
       2,
       2,
@@ -70,6 +57,8 @@ module.exports = {
     'react/require-extension': 0,
     'react/self-closing-comp': 0,
     'react/sort-comp': 0,
+    'react/prefer-stateless-function': 0,
+    'react/default-props-match-prop-types': 0,
     'require-yield': 0,
     'no-underscore-dangle': 0,
     'quotes': ['error', 'single'],

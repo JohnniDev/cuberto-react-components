@@ -1,0 +1,40 @@
+.cub-dropdown {
+    position: relative;
+}
+
+input.cub-dropdown-control {
+    border: none;
+}
+
+input.cub-dropdown-control:focus {
+    outline: none;
+}
+
+.cub-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    width: 100%;
+    background-color: #fff;
+    border: 1px solid #dbdbdb;
+    border-top: none;
+}
+
+.cub-dropdown-menu.-open {
+    display: block;
+}
+
+.cub-dropdown-items {
+    max-height: 300px;
+    overflow: auto;
+}
+
+.cub-dropdown-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    user-select: none;
+}
