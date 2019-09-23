@@ -1,5 +1,7 @@
 const path = require('path');
 
+const env = process.env.NODE_ENV;
+
 module.exports = {
     entry: './src/index.js',
     module: {
@@ -23,5 +25,5 @@ module.exports = {
         filename: 'build.js',
         libraryTarget: 'umd'
     },
-    watch: true,
+    watch: env === 'development',
 };
