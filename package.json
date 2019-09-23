@@ -10,8 +10,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "setup": "npm install && npm run build && npm install . -g && npm link && cd example && npm install && npm link cuberto-react-components",
-    "start": "webpack --mode development",
-    "build": "webpack --mode production",
+    "start": "cross-env NODE_ENV=development webpack",
+    "build": "cross-env NODE_ENV=production webpack",
     "flow": "flow",
     "lint": "./node_modules/.bin/eslint"
   },
@@ -26,6 +26,7 @@
     "@babel/preset-react": "^7.0.0",
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.5",
+    "cross-env": "^6.0.0",
     "eslint": "^6.4.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-config-prettier": "^6.3.0",

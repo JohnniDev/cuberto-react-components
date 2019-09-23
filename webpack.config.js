@@ -4,6 +4,7 @@ const env = process.env.NODE_ENV;
 
 module.exports = {
     entry: './src/index.js',
+    mode: env,
     module: {
         rules: [
             {
