@@ -1,6 +1,7 @@
 // @flow
-/* eslint-disable react/no-array-index-key */
-import React, { Component, createRef } from 'react';
+import React, { Component, createRef, type Node } from 'react';
+import { SyntheticEvent } from 'react-dom';
+import shallowEqual from 'shallowequal';
 import classNames from 'classnames';
 import { Item, Value, ClassName } from './types';
 import DropdownItem from './DropdownItem';
@@ -11,7 +12,7 @@ type Props = {
   options: Array<Item>,
   defaultValue: Value,
   disabled: boolean,
-  open: boolean,
+  defaultOpen: boolean,
   closeOnSelect: boolean,
   noResultsMessage: string,
   controlClassName: ClassName,
@@ -19,22 +20,15 @@ type Props = {
   menuClassName: ClassName,
   itemsWrapperClassName: ClassName,
   itemClassName: ClassName,
-  onControlClick: () => void,
-  onItemClick: () => void,
-  renderControl: (
-    {
-      defaultValue: Value,
-      disabled: boolean,
-      controlClassName: ClassName,
-      controlWrapperClassName: ClassName,
-    },
-    handleClick: () => void,
-  ) => React.Node,
-  renderItem: (item: Item, { itemClassName: ClassName }, handleClick: () => void) => React.Node | string,
+  onControlClick: (evt: SyntheticEvent<HTMLButtonElement>) => void,
+  onItemClick: (evt: SyntheticEvent<HTMLButtonElement>, item: Item) => void,
+  customControl: (props: any) => Node,
+  renderItem: (item: Item, selected: Item) => (props: any) => Node,
 };
 
 type State = {
   open: boolean,
+  value: Value,
 };
 
 class Dropdown extends Component<Props, State> {
@@ -42,7 +36,7 @@ class Dropdown extends Component<Props, State> {
     options: [],
     defaultValue: '',
     disabled: false,
-    open: false,
+    defaultOpen: false,
     closeOnSelect: true,
     noResultsMessage: 'No results found.',
     controlClassName: '',
@@ -52,51 +46,51 @@ class Dropdown extends Component<Props, State> {
     itemClassName: '',
     onControlClick: () => {},
     onItemClick: () => {},
-    renderControl: ({ defaultValue, disabled, controlClassName, controlWrapperClassName }, handleClick) => {
-      const controlWrapperCn = classNames('cub-dropdown-control-wrapper', controlWrapperClassName);
-      const controlCn = classNames('cub-dropdown-control', controlClassName);
-      return (
-        <div className={controlWrapperCn}>
-          <input
-            type="text"
-            defaultValue={defaultValue}
-            disabled={disabled}
-            className={controlCn}
-            onClick={handleClick}
-          />
-        </div>
-      );
-    },
-    renderItem: (item, { itemClassName }, handleClick) => {
-      const cn = classNames('cub-dropdown-item', itemClassName);
-      return (
-        <DropdownItem key={item._id} item={item} className={cn} onClick={handleClick}>
-          {item.name}
-        </DropdownItem>
-      );
-    },
+    customControl: ({ selected, ...props }) => (
+      <input type="text" defaultValue={(selected && selected.name) || ''} {...props} />
+    ),
+    renderItem: item => props => (
+      <DropdownItem item={item} {...props}>
+        {item.name}
+      </DropdownItem>
+    ),
   };
 
   state: State = {
-    open: this.props.open,
+    open: this.props.defaultOpen,
+    value: this.props.defaultValue,
   };
 
-  dropdownRef: React.Ref = createRef();
+  dropdownRef: { current: null | HTMLDivElement } = createRef();
 
   handleOutsideClick = this.outsideClick.bind(this);
 
-  handleControlClick(evt: MouseEvent): void {
+  componentWillUnmount() {
+    this.toggleMenu(false);
+  }
+
+  shouldComponentUpdate(nextProps: Props, nextState: State) {
+    return !shallowEqual(nextProps, this.props) || !shallowEqual(nextState, this.state);
+  }
+
+  getSelectedValue(): Item {
+    const { value } = this.state;
+    return (value && this.props.options.find(x => x._id === value)) || null;
+  }
+
+  handleControlClick(evt: SyntheticEvent<HTMLButtonElement>): void {
     if (!this.state.open) this.toggleMenu(true);
     this.props.onControlClick(evt);
   }
 
-  handleItemClick(evt: MouseEvent): void {
+  handleItemClick(evt: SyntheticEvent<HTMLButtonElement>, item: Item): void {
+    this.setState({ value: item._id });
+    this.props.onItemClick(evt, item);
     if (this.props.closeOnSelect) this.toggleMenu(false);
-    this.props.onItemClick(evt);
   }
 
-  outsideClick(evt: MouseEvent): void {
-    if (this.dropdownRef.current && this.dropdownRef.current.contains(evt.target)) return;
+  outsideClick(evt: SyntheticEvent<any>): void {
+    if (this.dropdownRef.current && this.dropdownRef.current.contains((evt.target: any))) return;
     this.toggleMenu(false);
   }
 
@@ -107,35 +101,55 @@ class Dropdown extends Component<Props, State> {
     document[action]('click', this.handleOutsideClick, false);
   }
 
-  renderMenu(): React.Node {
-    const { options, renderItem, noResultsMessage, menuClassName, itemsWrapperClassName, itemClassName } = this.props;
+  renderControl() {
+    const { customControl, defaultValue, disabled, controlClassName, controlWrapperClassName } = this.props;
+    const controlWrapperCn = classNames('cub-dropdown-control-wrapper', controlWrapperClassName);
+    const controlCn = classNames('cub-dropdown-control', controlClassName);
+    return (
+      <div className={controlWrapperCn}>
+        {React.createElement(customControl, {
+          defaultValue,
+          disabled,
+          selected: this.getSelectedValue(),
+          className: controlCn,
+          onClick: e => this.handleControlClick(e)
+        })}
+      </div>
+    );
+  }
+
+  renderOption(item: Item) {
+    const { renderItem, itemClassName } = this.props;
+    const itemCn = classNames('cub-dropdown-item', itemClassName);
+    const Option = renderItem(item);
+    return <Option key={item._id} className={itemCn} onClick={e => this.handleItemClick(e, item)} />;
+  }
+
+  renderMenu(): Node {
+    const { options, noResultsMessage, menuClassName, itemsWrapperClassName } = this.props;
     const { open } = this.state;
 
     const menuCn = classNames('cub-dropdown-menu', { '-open': open }, menuClassName);
     const itemsCn = classNames('cub-dropdown-items', itemsWrapperClassName);
 
     if (!options.length) return <div className={menuCn}>{noResultsMessage}</div>;
+
     return (
       <div className={menuCn}>
         <div className="cub-dropdown-menu-inner">
-          <div className={itemsCn}>
-            {options.map(option => renderItem(option, { itemClassName }, this.handleItemClick.bind(this)))}
-          </div>
+          <div className={itemsCn}>{options.map(this.renderOption.bind(this))}</div>
         </div>
       </div>
     );
   }
 
   render() {
-    const { renderControl, defaultValue, disabled, controlClassName, controlWrapperClassName } = this.props;
+    const { open } = this.state;
 
     return (
       <div className="cub-dropdown" ref={this.dropdownRef}>
-        {renderControl(
-          { defaultValue, disabled, controlClassName, controlWrapperClassName },
-          this.handleControlClick.bind(this),
-        )}
-        {this.renderMenu()}
+        {this.renderControl()}
+        {open && this.renderMenu()}
       </div>
     );
   }

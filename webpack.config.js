@@ -27,4 +27,5 @@ module.exports = {
     libraryTarget: 'umd',
   },
   watch: env === 'development',
+  devtool: env === 'development' ? 'eval-source-map' : false,
 };

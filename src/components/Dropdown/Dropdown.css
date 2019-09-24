@@ -3,7 +3,7 @@
 }
 
 input.cub-dropdown-control {
-    border: none;
+    cursor: pointer;
 }
 
 input.cub-dropdown-control:focus {
@@ -14,7 +14,7 @@ input.cub-dropdown-control:focus {
     display: none;
     position: absolute;
     top: 100%;
-    width: 100%;
+    min-width: 100%;
     background-color: #fff;
     border: 1px solid #dbdbdb;
     border-top: none;

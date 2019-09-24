@@ -45,5 +45,6 @@ module.exports = {
 		progress: true,
 		contentBase: './dist',
 		port: 8080
-	}
+	},
+	devtool: 'eval-source-map',
 };

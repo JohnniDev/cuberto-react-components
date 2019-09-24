@@ -4,7 +4,7 @@ import {Router, Switch, Route, Redirect, Link} from 'react-router-dom';
 
 // Components:
 import Main from "../Main/Main";
-import Dropdown from "../Dropdown/Dropdown";
+import DropdownPage from "../DropdownPage/DropdownPage";
 
 import './App.css';
 
@@ -15,7 +15,7 @@ export default () => (
         <div className="app">
             <div className="container">
                 <div className="columns">
-                    <div className="column is-one-quarter">
+                    <div className="column is-one-fifth">
                         <aside className="menu main-menu">
                             <p className="menu-label">General</p>
                             <ul className="menu-list">
@@ -31,7 +31,7 @@ export default () => (
                         <Switch>
                             <Route path="/" exact component={() => <Redirect to={{pathname: '/main'}}/>}/>
                             <Route path="/main" component={Main}/>
-                            <Route path="/dropdown" component={Dropdown}/>
+                            <Route path="/dropdown" component={DropdownPage}/>
                         </Switch>
                     </div>
                 </div>
