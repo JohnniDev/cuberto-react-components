@@ -7,7 +7,7 @@
     align-items: center;
 }
 
-.cub-dropdown-control {
+.cub-dropdown:not(.-opened) .cub-dropdown-control {
     cursor: pointer;
 }
 
