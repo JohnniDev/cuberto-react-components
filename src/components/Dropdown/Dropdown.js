@@ -1,6 +1,6 @@
 // @flow
 import React, { Component, createRef, type Node } from 'react';
-import { SyntheticEvent } from 'react-dom';
+import { SyntheticEvent, SyntheticInputEvent } from 'react-dom';
 import shallowEqual from 'shallowequal';
 import classNames from 'classnames';
 import { Item, Value, ClassName } from './types';
@@ -11,54 +11,80 @@ import './Dropdown.css';
 type Props = {
   options: Array<Item>,
   defaultValue: Value,
-  disabled: boolean,
   defaultOpen: boolean,
-  closeOnSelect: boolean,
-  noResultsMessage: string,
-  controlClassName: ClassName,
+  disabled: boolean,
+  className: { [key: string]: string } | string,
+  style: { [key: string]: string | number },
+
+  // Control
+  customControl: (props: any) => Node,
   controlWrapperClassName: ClassName,
+  controlClassName: ClassName,
+  onControlClick: (evt: SyntheticEvent<HTMLButtonElement>) => void,
+  onControlChange: (evt: SyntheticInputEvent<HTMLInputElement>) => void,
+  placeholder: string,
+  searchable: boolean,
+
+  // Menu / Item
   menuClassName: ClassName,
   itemsWrapperClassName: ClassName,
   itemClassName: ClassName,
-  onControlClick: (evt: SyntheticEvent<HTMLButtonElement>) => void,
   onItemClick: (evt: SyntheticEvent<HTMLButtonElement>, item: Item) => void,
-  customControl: (props: any) => Node,
   renderItem: (item: Item, selected: Item) => (props: any) => Node,
+
+  // Other
+  closeOnSelect: boolean,
+  noResultsMessage: string,
+  showArrow: boolean,
 };
 
 type State = {
   open: boolean,
   value: Value,
+  query: string,
+  searchedOptions: Array<Item>,
 };
 
 class Dropdown extends Component<Props, State> {
   static defaultProps: Props = {
     options: [],
     defaultValue: '',
-    disabled: false,
     defaultOpen: false,
-    closeOnSelect: true,
-    noResultsMessage: 'No results found.',
-    controlClassName: '',
+    disabled: false,
+    className: '',
+    style: {},
+
+    // Control
+    customControl: ({ defaultValue, selected, query, ...props }) => <input type="text" {...props} />,
     controlWrapperClassName: '',
+    controlClassName: '',
+    onControlClick: () => {},
+    onControlChange: () => {},
+    placeholder: 'Select',
+    searchable: true,
+
+    // Menu / Item
     menuClassName: '',
     itemsWrapperClassName: '',
     itemClassName: '',
-    onControlClick: () => {},
     onItemClick: () => {},
-    customControl: ({ selected, ...props }) => (
-      <input type="text" defaultValue={(selected && selected.name) || ''} {...props} />
-    ),
     renderItem: item => props => (
       <DropdownItem item={item} {...props}>
         {item.name}
       </DropdownItem>
     ),
+
+    // Other
+    closeOnSelect: true,
+    noResultsMessage: 'No results found.',
+    showArrow: true,
   };
 
   state: State = {
     open: this.props.defaultOpen,
     value: this.props.defaultValue,
+    query: (this.getSelectedValue() || {}).name || '',
+    searchedOptions: this.props.options.slice(0),
   };
 
   dropdownRef: { current: null | HTMLDivElement } = createRef();
@@ -74,7 +100,8 @@ class Dropdown extends Component<Props, State> {
   }
 
   getSelectedValue(): Item {
-    const { value } = this.state;
+    let { value } = this.state || {};
+    value = value || this.props.defaultValue;
     return (value && this.props.options.find(x => x._id === value)) || null;
   }
 
@@ -83,8 +110,18 @@ class Dropdown extends Component<Props, State> {
     this.props.onControlClick(evt);
   }
 
+  handleControlChange(evt: SyntheticInputEvent<HTMLInputElement>): void {
+    const { options, onControlChange } = this.props;
+    const { value } = evt.target;
+    this.setState({
+      query: value,
+      searchedOptions: options.slice(0).filter(x => x.name.toLowerCase().includes(value.toLowerCase())),
+    });
+    onControlChange(evt);
+  }
+
   handleItemClick(evt: SyntheticEvent<HTMLButtonElement>, item: Item): void {
-    this.setState({ value: item._id });
+    this.setState({ value: item._id, query: item.name });
     this.props.onItemClick(evt, item);
     if (this.props.closeOnSelect) this.toggleMenu(false);
   }
@@ -96,24 +133,38 @@ class Dropdown extends Component<Props, State> {
 
   toggleMenu(open: boolean): void {
     this.setState({ open });
+    if (!open) this.setState({ searchedOptions: this.props.options });
     const action = open ? 'addEventListener' : 'removeEventListener';
     // $FlowFixMe
     document[action]('click', this.handleOutsideClick, false);
   }
 
   renderControl() {
-    const { customControl, defaultValue, disabled, controlClassName, controlWrapperClassName } = this.props;
+    const {
+      customControl,
+      defaultValue,
+      disabled,
+      placeholder,
+      showArrow,
+      controlClassName,
+      controlWrapperClassName,
+    } = this.props;
+    const { query } = this.state;
     const controlWrapperCn = classNames('cub-dropdown-control-wrapper', controlWrapperClassName);
     const controlCn = classNames('cub-dropdown-control', controlClassName);
     return (
       <div className={controlWrapperCn}>
         {React.createElement(customControl, {
           defaultValue,
+          value: query,
           disabled,
+          placeholder,
           selected: this.getSelectedValue(),
           className: controlCn,
-          onClick: e => this.handleControlClick(e)
+          onClick: e => this.handleControlClick(e),
+          onChange: e => this.handleControlChange(e),
         })}
+        {showArrow && <span className="cub-dropdown-arrow">&rsaquo;</span>}
       </div>
     );
   }
@@ -126,28 +177,33 @@ class Dropdown extends Component<Props, State> {
   }
 
   renderMenu(): Node {
-    const { options, noResultsMessage, menuClassName, itemsWrapperClassName } = this.props;
-    const { open } = this.state;
+    const { options, searchable, noResultsMessage, menuClassName, itemsWrapperClassName } = this.props;
+    const { open, query, searchedOptions } = this.state;
 
     const menuCn = classNames('cub-dropdown-menu', { '-open': open }, menuClassName);
     const itemsCn = classNames('cub-dropdown-items', itemsWrapperClassName);
 
-    if (!options.length) return <div className={menuCn}>{noResultsMessage}</div>;
+    const visibleOptions = searchable && query ? searchedOptions : options;
+
+    if (!visibleOptions.length) return <div className={menuCn}>{noResultsMessage}</div>;
 
     return (
       <div className={menuCn}>
         <div className="cub-dropdown-menu-inner">
-          <div className={itemsCn}>{options.map(this.renderOption.bind(this))}</div>
+          <div className={itemsCn}>{visibleOptions.map(this.renderOption.bind(this))}</div>
         </div>
       </div>
     );
   }
 
   render() {
+    const { style, className } = this.props;
     const { open } = this.state;
 
+    const dropdownCn = classNames('cub-dropdown', { '-opened': open }, className);
+
     return (
-      <div className="cub-dropdown" ref={this.dropdownRef}>
+      <div className={dropdownCn} ref={this.dropdownRef} style={style}>
         {this.renderControl()}
         {open && this.renderMenu()}
       </div>

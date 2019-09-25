@@ -1,3 +1,7 @@
-.hero .hero-body {
-    padding-top: 0;
+.is-padding-bottom {
+    margin-bottom: 30px;
+}
+
+.is-padding-bottom:last-child {
+    margin-bottom: 0;
 }
