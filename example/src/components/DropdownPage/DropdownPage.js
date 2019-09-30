@@ -1,29 +1,32 @@
 import React, { Component } from 'react';
 import { Dropdown } from 'cuberto-react-components';
 
-const Control = ({ selected, placeholder, ...props }) => (<span {...props}>{selected && selected.name || placeholder || null}</span>);
-
 export default class DropdownPage extends Component {
   state = {
-    isOpen: false,
     options: [],
-    selectedId: 'first',
+    value: '',
+    selected: null,
   };
 
-  setOptions() {
+  getOptions(term = '') {
     const options = [
       { _id: 'first', name: 'First' },
       { _id: 'second', name: 'Second' },
     ];
-    this.setState({ options });
+    return options.filter(x => x.name.toLowerCase().includes(term.toLowerCase()));
   }
 
   onSelect(evt, selected) {
-    if (selected) this.setState({ selectedId: selected._id });
+    this.setState({ selected, value: selected.name });
+  }
+
+  onChange(evt) {
+    const { value } = evt.target;
+    this.setState({ value, options: this.getOptions(value) });
   }
 
   render() {
-    const { isOpen, options, selectedId } = this.state;
+    const { options, value, selected } = this.state;
 
     return (
       <section className="section is-paddingless">
@@ -37,7 +40,8 @@ export default class DropdownPage extends Component {
         </div>
 
         <div className="is-padding-bottom">
-          <button type="button" className="button" onClick={this.setOptions.bind(this)}>Set options</button>
+          <button type="button" className="button" onClick={() => this.setState({ options: this.getOptions() })}>Set options</button> &nbsp;
+          <button type="button" className="button" onClick={() => this.setState({ options: this.getOptions(), value: '', selected: null })}>Clear</button> &nbsp;
         </div>
 
         <div className="panel is-padding-bottom">
@@ -45,37 +49,20 @@ export default class DropdownPage extends Component {
           <div className="panel-block">
             <Dropdown
               options={options}
-              defaultOpen={isOpen}
-              value={selectedId}
+              value={value}
               itemClassName="button"
               controlClassName="input"
               placeholder="Base"
-              onSelect={this.onSelect.bind(this)}
+              onSelect={(evt, val) => this.onSelect(evt, val)}
+              onControlChange={(evt, val) => this.onChange(evt, val)}
             />
           </div>
         </div>
 
         <div className="panel is-padding-bottom">
-          <p className="panel-heading">Custom control</p>
+          <p className="panel-heading">Options</p>
           <div className="panel-block">
-            <div>
-              Lorem ipsum
-
-              <Dropdown
-                options={options}
-                defaultOpen={isOpen}
-                value={selectedId}
-                itemClassName="button"
-                customControl={Control}
-                onSelect={this.onSelect.bind(this)}
-                style={{ display: 'inline-block', padding: '0 5px' }}
-              />
-
-              sit amet, consectetur adipisicing elit. Accusamus accusantium at beatae cum,
-              dolor fugiat fugit iste laborum, laudantium neque nulla obcaecati odio pariatur quam qui reiciendis
-              repudiandae saepe similique tenetur voluptatum. Aliquam dolor iure, iusto maxime nesciunt possimus sequi
-              similique vel. Ab accusantium, assumenda dolores earum illum minus modi.
-            </div>
+            <pre>{JSON.stringify(selected, null, 4)}</pre>
           </div>
         </div>
       </section>

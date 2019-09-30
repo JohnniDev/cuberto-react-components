@@ -43,7 +43,6 @@ type Props = {
 
 type State = {
   open: boolean,
-  searchedOptions: Array<Item>,
 };
 
 class Dropdown extends Component<Props, State> {
@@ -56,7 +55,7 @@ class Dropdown extends Component<Props, State> {
     style: {},
 
     // Control
-    customControl: ({ selected, query, ...props }) => <input type="text" {...props} value={query} />,
+    customControl: ({ ...props }) => <input type="text" {...props} />,
     controlWrapperClassName: '',
     controlClassName: '',
     placeholder: 'Select',
@@ -87,7 +86,6 @@ class Dropdown extends Component<Props, State> {
 
     this.state = {
       open: props.defaultOpen,
-      searchedOptions: props.options.slice(0),
     };
   }
 
@@ -113,15 +111,6 @@ class Dropdown extends Component<Props, State> {
   handleControlClick(evt: SyntheticEvent<HTMLButtonElement>): void {
     if (!this.state.open) this.toggleMenu(true);
     this.props.onControlClick(evt);
-  }
-
-  handleControlChange(evt: SyntheticInputEvent<HTMLInputElement>): void {
-    const { options, onControlChange } = this.props;
-    const { value } = evt.target;
-    this.setState({
-      searchedOptions: options.slice(0).filter(x => x.name.toLowerCase().includes(value.toLowerCase())),
-    });
-    onControlChange(evt);
   }
 
   handleControlKeyDown(evt: SyntheticKeyboardEvent<HTMLInputElement>): void {
@@ -183,7 +172,6 @@ class Dropdown extends Component<Props, State> {
 
   toggleMenu(open: boolean): void {
     this.setState({ open });
-    if (!open) this.setState({ searchedOptions: this.props.options });
     const action = open ? 'addEventListener' : 'removeEventListener';
     // $FlowFixMe
     document[action]('click', this.handleOutsideClick, false);
@@ -198,22 +186,21 @@ class Dropdown extends Component<Props, State> {
       placeholder,
       controlClassName,
       controlWrapperClassName,
+      onControlChange,
     } = this.props;
     const controlWrapperCn = classNames('cub-dropdown-control-wrapper', controlWrapperClassName);
     const controlCn = classNames('cub-dropdown-control', controlClassName);
-    const selected = this.getSelectedValue();
     return (
       <div className={controlWrapperCn}>
         {React.createElement(customControl, {
           value,
-          query: (selected && selected.name) || '',
           disabled,
           tabIndex,
+          autoComplete: 'off',
           placeholder,
-          selected,
           className: controlCn,
           onClick: e => this.handleControlClick(e),
-          onChange: e => this.handleControlChange(e),
+          onChange: e => onControlChange(e),
           onKeyDown: e => this.handleControlKeyDown(e),
         })}
       </div>
