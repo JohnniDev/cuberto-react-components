@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "classnames": "^2.2.6",
+    "keyboard-key": "^1.0.4",
     "prop-types": "latest",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",

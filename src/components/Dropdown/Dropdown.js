@@ -1,7 +1,9 @@
 // @flow
 import React, { Component, createRef, type Node } from 'react';
-import { SyntheticEvent, SyntheticInputEvent } from 'react-dom';
+import { SyntheticEvent, SyntheticKeyboardEvent, SyntheticInputEvent } from 'react-dom';
+// eslint-disable-next-line import/no-unresolved
 import shallowEqual from 'shallowequal';
+import keyboardKey from 'keyboard-key';
 import classNames from 'classnames';
 import { Item, Value, ClassName } from './types';
 import DropdownItem from './DropdownItem';
@@ -20,17 +22,19 @@ type Props = {
   customControl: (props: any) => Node,
   controlWrapperClassName: ClassName,
   controlClassName: ClassName,
+  placeholder: string,
+  tabIndex: string | number,
   onControlClick: (evt: SyntheticEvent<HTMLButtonElement>) => void,
   onControlChange: (evt: SyntheticInputEvent<HTMLInputElement>) => void,
-  placeholder: string,
-  searchable: boolean,
+  onControlKeyDown: (evt: SyntheticKeyboardEvent<HTMLInputElement>) => void,
 
   // Menu / Item
+  customItem: (props: any) => Node,
   menuClassName: ClassName,
   itemsWrapperClassName: ClassName,
   itemClassName: ClassName,
   onSelect: (evt: SyntheticEvent<HTMLButtonElement>, item: Item) => void,
-  renderItem: (item: Item, selected: Item) => (props: any) => Node,
+  onItemKeyDown: (evt: SyntheticKeyboardEvent<HTMLButtonElement>) => void,
 
   // Other
   closeOnSelect: boolean,
@@ -55,20 +59,23 @@ class Dropdown extends Component<Props, State> {
     customControl: ({ selected, query, ...props }) => <input type="text" {...props} value={query} />,
     controlWrapperClassName: '',
     controlClassName: '',
+    placeholder: 'Select',
+    tabIndex: 1,
     onControlClick: () => {},
     onControlChange: () => {},
-    placeholder: 'Select',
+    onControlKeyDown: () => {},
 
     // Menu / Item
-    menuClassName: '',
-    itemsWrapperClassName: '',
-    itemClassName: '',
-    onSelect: () => {},
-    renderItem: item => props => (
+    customItem: ({ item, ...props }) => (
       <DropdownItem item={item} {...props}>
         {item.name}
       </DropdownItem>
     ),
+    menuClassName: '',
+    itemsWrapperClassName: '',
+    itemClassName: '',
+    onSelect: () => {},
+    onItemKeyDown: () => {},
 
     // Other
     closeOnSelect: true,
@@ -85,6 +92,8 @@ class Dropdown extends Component<Props, State> {
   }
 
   dropdownRef: { current: null | HTMLDivElement } = createRef();
+
+  menuRef: { current: null | HTMLDivElement } = createRef();
 
   handleOutsideClick = this.outsideClick.bind(this);
 
@@ -115,6 +124,53 @@ class Dropdown extends Component<Props, State> {
     onControlChange(evt);
   }
 
+  handleControlKeyDown(evt: SyntheticKeyboardEvent<HTMLInputElement>): void {
+    const { target } = evt;
+    const { open } = this.state;
+    const key = keyboardKey.getCode(evt);
+
+    // Close dropdown and unfocusing input
+    if (key === keyboardKey.Escape) {
+      this.toggleMenu(false);
+      target.blur();
+    }
+
+    // Open dropdown on press spacebar/enter
+    if ([keyboardKey.Spacebar, keyboardKey.Enter].includes(key) && !open) {
+      evt.preventDefault();
+      this.toggleMenu(true);
+    }
+
+    // Focus first/last item
+    if ([keyboardKey.ArrowDown, keyboardKey.ArrowUp].includes(key) && this.menuRef.current && open) {
+      const direction = key === keyboardKey.ArrowDown ? 'first' : 'last';
+      const item = this.menuRef.current.querySelector(`.cub-dropdown-item:${direction}-child`);
+      if (item) item.focus();
+    }
+  }
+
+  handleItemKeyDown(evt: SyntheticKeyboardEvent<HTMLButtonElement>): void {
+    const { target } = evt;
+    const key = keyboardKey.getCode(evt);
+
+    // Close dropdown and unfocusing input
+    if (key === keyboardKey.Escape) {
+      this.toggleMenu(false);
+      // TODO: Сделать фокус на control
+    }
+
+    // Focus next/prev item
+    if ([keyboardKey.ArrowDown, keyboardKey.ArrowUp].includes(key) && this.menuRef.current) {
+      const item =
+        key === keyboardKey.ArrowDown
+          ? target.nextElementSibling || this.menuRef.current.querySelector('.cub-dropdown-item:first-child')
+          : target.previousElementSibling || this.menuRef.current.querySelector('.cub-dropdown-item:last-child');
+      if (item) item.focus();
+    }
+
+    this.props.onItemKeyDown(evt);
+  }
+
   handleItemClick(evt: SyntheticEvent<HTMLButtonElement>, item: Item): void {
     this.props.onSelect(evt, item);
     if (this.props.closeOnSelect) this.toggleMenu(false);
@@ -134,7 +190,15 @@ class Dropdown extends Component<Props, State> {
   }
 
   renderControl(): Node {
-    const { customControl, value, disabled, placeholder, controlClassName, controlWrapperClassName } = this.props;
+    const {
+      customControl,
+      value,
+      disabled,
+      tabIndex,
+      placeholder,
+      controlClassName,
+      controlWrapperClassName,
+    } = this.props;
     const controlWrapperCn = classNames('cub-dropdown-control-wrapper', controlWrapperClassName);
     const controlCn = classNames('cub-dropdown-control', controlClassName);
     const selected = this.getSelectedValue();
@@ -144,21 +208,29 @@ class Dropdown extends Component<Props, State> {
           value,
           query: (selected && selected.name) || '',
           disabled,
+          tabIndex,
           placeholder,
           selected,
           className: controlCn,
           onClick: e => this.handleControlClick(e),
           onChange: e => this.handleControlChange(e),
+          onKeyDown: e => this.handleControlKeyDown(e),
         })}
       </div>
     );
   }
 
-  renderOption(item: Item): Node {
-    const { renderItem, itemClassName } = this.props;
+  renderOption(item: Item) {
+    const { customItem, itemClassName } = this.props;
     const itemCn = classNames('cub-dropdown-item', itemClassName);
-    const Option = renderItem(item);
-    return <Option key={item._id} className={itemCn} onClick={e => this.handleItemClick(e, item)} />;
+    return React.createElement(customItem, {
+      item,
+      key: item._id,
+      selected: this.getSelectedValue(),
+      className: itemCn,
+      onClick: e => this.handleItemClick(e, item),
+      onKeyDown: e => this.handleItemKeyDown(e),
+    });
   }
 
   renderMenu(): Node {
@@ -168,13 +240,14 @@ class Dropdown extends Component<Props, State> {
     const menuCn = classNames('cub-dropdown-menu', { '-open': open, '-empty': !options.length }, menuClassName);
     const itemsCn = classNames('cub-dropdown-items', itemsWrapperClassName);
 
-    if (!options.length) return <div className={menuCn}>{noResultsMessage}</div>;
-
     return (
-      <div className={menuCn}>
-        <div className="cub-dropdown-menu-inner">
-          <div className={itemsCn}>{options.map(this.renderOption.bind(this))}</div>
-        </div>
+      <div className={menuCn} ref={this.menuRef}>
+        {!options.length && noResultsMessage}
+        {options.length > 0 && (
+          <div className="cub-dropdown-menu-inner">
+            <div className={itemsCn}>{options.map(this.renderOption.bind(this))}</div>
+          </div>
+        )}
       </div>
     );
   }

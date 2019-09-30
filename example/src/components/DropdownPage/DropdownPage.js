@@ -67,6 +67,7 @@ export default class DropdownPage extends Component {
                 value={selectedId}
                 itemClassName="button"
                 customControl={Control}
+                onSelect={this.onSelect.bind(this)}
                 style={{ display: 'inline-block', padding: '0 5px' }}
               />
 
