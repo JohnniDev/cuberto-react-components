@@ -1,20 +1,29 @@
 import React, { Component } from 'react';
 import { Dropdown } from 'cuberto-react-components';
 
-const options = [
-  { _id: 'first', name: 'First' },
-  { _id: 'second', name: 'Second' },
-];
-
-const Control = ({ selected, ...props }) => (<span {...props}>{selected && selected.name || 'null'}</span>);
+const Control = ({ selected, placeholder, ...props }) => (<span {...props}>{selected && selected.name || placeholder || null}</span>);
 
 export default class DropdownPage extends Component {
   state = {
     isOpen: false,
+    options: [],
+    selectedId: 'first',
   };
 
+  setOptions() {
+    const options = [
+      { _id: 'first', name: 'First' },
+      { _id: 'second', name: 'Second' },
+    ];
+    this.setState({ options });
+  }
+
+  onSelect(evt, selected) {
+    if (selected) this.setState({ selectedId: selected._id });
+  }
+
   render() {
-    const { isOpen } = this.state;
+    const { isOpen, options, selectedId } = this.state;
 
     return (
       <section className="section is-paddingless">
@@ -27,16 +36,21 @@ export default class DropdownPage extends Component {
           </h2>
         </div>
 
+        <div className="is-padding-bottom">
+          <button type="button" className="button" onClick={this.setOptions.bind(this)}>Set options</button>
+        </div>
+
         <div className="panel is-padding-bottom">
           <p className="panel-heading">Base</p>
           <div className="panel-block">
             <Dropdown
               options={options}
               defaultOpen={isOpen}
-              defaultValue={options[0]._id}
+              value={selectedId}
               itemClassName="button"
               controlClassName="input"
               placeholder="Base"
+              onSelect={this.onSelect.bind(this)}
             />
           </div>
         </div>
@@ -50,7 +64,7 @@ export default class DropdownPage extends Component {
               <Dropdown
                 options={options}
                 defaultOpen={isOpen}
-                defaultValue={options[0]._id}
+                value={selectedId}
                 itemClassName="button"
                 customControl={Control}
                 style={{ display: 'inline-block', padding: '0 5px' }}

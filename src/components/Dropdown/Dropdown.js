@@ -10,7 +10,7 @@ import './Dropdown.css';
 
 type Props = {
   options: Array<Item>,
-  defaultValue: Value,
+  value: Value,
   defaultOpen: boolean,
   disabled: boolean,
   className: { [key: string]: string } | string,
@@ -29,45 +29,41 @@ type Props = {
   menuClassName: ClassName,
   itemsWrapperClassName: ClassName,
   itemClassName: ClassName,
-  onItemClick: (evt: SyntheticEvent<HTMLButtonElement>, item: Item) => void,
+  onSelect: (evt: SyntheticEvent<HTMLButtonElement>, item: Item) => void,
   renderItem: (item: Item, selected: Item) => (props: any) => Node,
 
   // Other
   closeOnSelect: boolean,
   noResultsMessage: string,
-  showArrow: boolean,
 };
 
 type State = {
   open: boolean,
-  value: Value,
-  query: string,
   searchedOptions: Array<Item>,
 };
 
 class Dropdown extends Component<Props, State> {
   static defaultProps: Props = {
     options: [],
-    defaultValue: '',
+    value: '',
     defaultOpen: false,
     disabled: false,
     className: '',
     style: {},
 
     // Control
-    customControl: ({ defaultValue, selected, query, ...props }) => <input type="text" {...props} />,
+    customControl: ({ selected, query, ...props }) => <input type="text" {...props} value={query} />,
     controlWrapperClassName: '',
     controlClassName: '',
     onControlClick: () => {},
     onControlChange: () => {},
     placeholder: 'Select',
-    searchable: true,
 
     // Menu / Item
     menuClassName: '',
     itemsWrapperClassName: '',
     itemClassName: '',
-    onItemClick: () => {},
+    onSelect: () => {},
     renderItem: item => props => (
       <DropdownItem item={item} {...props}>
         {item.name}
@@ -77,15 +73,16 @@ class Dropdown extends Component<Props, State> {
     // Other
     closeOnSelect: true,
     noResultsMessage: 'No results found.',
-    showArrow: true,
   };
 
-  state: State = {
-    open: this.props.defaultOpen,
-    value: this.props.defaultValue,
-    query: (this.getSelectedValue() || {}).name || '',
-    searchedOptions: this.props.options.slice(0),
-  };
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      open: props.defaultOpen,
+      searchedOptions: props.options.slice(0),
+    };
+  }
 
   dropdownRef: { current: null | HTMLDivElement } = createRef();
 
@@ -100,9 +97,8 @@ class Dropdown extends Component<Props, State> {
   }
 
   getSelectedValue(): Item {
-    let { value } = this.state || {};
-    value = value || this.props.defaultValue;
-    return (value && this.props.options.find(x => x._id === value)) || null;
+    const { value, options } = this.props;
+    return (value && options.find(x => x._id === value)) || null;
   }
 
   handleControlClick(evt: SyntheticEvent<HTMLButtonElement>): void {
@@ -114,15 +110,13 @@ class Dropdown extends Component<Props, State> {
     const { options, onControlChange } = this.props;
     const { value } = evt.target;
     this.setState({
-      query: value,
       searchedOptions: options.slice(0).filter(x => x.name.toLowerCase().includes(value.toLowerCase())),
     });
     onControlChange(evt);
   }
 
   handleItemClick(evt: SyntheticEvent<HTMLButtonElement>, item: Item): void {
-    this.setState({ value: item._id, query: item.name });
-    this.props.onItemClick(evt, item);
+    this.props.onSelect(evt, item);
     if (this.props.closeOnSelect) this.toggleMenu(false);
   }
 
@@ -139,37 +133,28 @@ class Dropdown extends Component<Props, State> {
     document[action]('click', this.handleOutsideClick, false);
   }
 
-  renderControl() {
-    const {
-      customControl,
-      defaultValue,
-      disabled,
-      placeholder,
-      showArrow,
-      controlClassName,
-      controlWrapperClassName,
-    } = this.props;
-    const { query } = this.state;
+  renderControl(): Node {
+    const { customControl, value, disabled, placeholder, controlClassName, controlWrapperClassName } = this.props;
     const controlWrapperCn = classNames('cub-dropdown-control-wrapper', controlWrapperClassName);
     const controlCn = classNames('cub-dropdown-control', controlClassName);
+    const selected = this.getSelectedValue();
     return (
       <div className={controlWrapperCn}>
         {React.createElement(customControl, {
-          defaultValue,
-          value: query,
+          value,
+          query: (selected && selected.name) || '',
           disabled,
           placeholder,
-          selected: this.getSelectedValue(),
+          selected,
           className: controlCn,
           onClick: e => this.handleControlClick(e),
           onChange: e => this.handleControlChange(e),
         })}
-        {showArrow && <span className="cub-dropdown-arrow">&rsaquo;</span>}
       </div>
     );
   }
 
-  renderOption(item: Item) {
+  renderOption(item: Item): Node {
     const { renderItem, itemClassName } = this.props;
     const itemCn = classNames('cub-dropdown-item', itemClassName);
     const Option = renderItem(item);
@@ -177,26 +162,24 @@ class Dropdown extends Component<Props, State> {
   }
 
   renderMenu(): Node {
-    const { options, searchable, noResultsMessage, menuClassName, itemsWrapperClassName } = this.props;
-    const { open, query, searchedOptions } = this.state;
+    const { options, noResultsMessage, menuClassName, itemsWrapperClassName } = this.props;
+    const { open } = this.state;
 
-    const menuCn = classNames('cub-dropdown-menu', { '-open': open }, menuClassName);
+    const menuCn = classNames('cub-dropdown-menu', { '-open': open, '-empty': !options.length }, menuClassName);
     const itemsCn = classNames('cub-dropdown-items', itemsWrapperClassName);
 
-    const visibleOptions = searchable && query ? searchedOptions : options;
-
-    if (!visibleOptions.length) return <div className={menuCn}>{noResultsMessage}</div>;
+    if (!options.length) return <div className={menuCn}>{noResultsMessage}</div>;
 
     return (
       <div className={menuCn}>
         <div className="cub-dropdown-menu-inner">
-          <div className={itemsCn}>{visibleOptions.map(this.renderOption.bind(this))}</div>
+          <div className={itemsCn}>{options.map(this.renderOption.bind(this))}</div>
         </div>
       </div>
     );
   }
 
-  render() {
+  render(): Node {
     const { style, className } = this.props;
     const { open } = this.state;
 
