@@ -1,6 +1,6 @@
 // @flow
 import React, { Component, createRef, type Node } from 'react';
-import { SyntheticEvent, SyntheticKeyboardEvent, SyntheticInputEvent } from 'react-dom';
+import { SyntheticEvent, SyntheticKeyboardEvent } from 'react-dom';
 import shallowEqual from 'shallowequal';
 import keyboardKey from 'keyboard-key';
 import classNames from 'classnames';
@@ -23,7 +23,6 @@ type Props = {
   customControlArrow?: (props: any) => Node,
   customControlProps: { [key: string]: any },
   onControlClick: (evt: SyntheticEvent<HTMLButtonElement>) => void,
-  onControlChange: (evt: SyntheticInputEvent<HTMLInputElement>) => void,
   onControlKeyDown: (evt: SyntheticKeyboardEvent<HTMLInputElement>) => void,
 
   // Menu / Item
@@ -31,7 +30,7 @@ type Props = {
   menuClassName: ClassName,
   itemsWrapperClassName: ClassName,
   itemClassName: ClassName,
-  onSelect: (evt: SyntheticEvent<HTMLButtonElement>, item: Item) => void,
+  onSelect: Item => void,
   onItemKeyDown: (evt: SyntheticKeyboardEvent<HTMLButtonElement>) => void,
   onClose: () => void,
 
@@ -62,7 +61,6 @@ class Dropdown extends Component<Props, State> {
     controlWrapperClassName: '',
     customControlProps: {},
     onControlClick: () => {},
-    onControlChange: () => {},
     onControlKeyDown: () => {},
 
     // Menu / Item
@@ -112,6 +110,10 @@ class Dropdown extends Component<Props, State> {
     return (value && options.find(x => getValue(x) === value)) || null;
   }
 
+  getItemsElements(): NodeList<HTMLElement> | [] {
+    return (this.menuRef.current && this.menuRef.current.querySelectorAll('.cub-dropdown-item')) || [];
+  }
+
   handleControlClick(evt: SyntheticEvent<HTMLButtonElement>): void {
     if (!this.state.open) this.toggleMenu(true);
     this.props.onControlClick(evt);
@@ -119,6 +121,7 @@ class Dropdown extends Component<Props, State> {
 
   handleControlKeyDown(evt: SyntheticKeyboardEvent<HTMLInputElement>): void {
     const { target } = evt;
+    const { options, onSelect } = this.props;
     const { open } = this.state;
     const key = keyboardKey.getCode(evt);
 
@@ -134,14 +137,20 @@ class Dropdown extends Component<Props, State> {
       this.toggleMenu(true);
     }
 
-    // Focus first/last item
-    if ([keyboardKey.ArrowDown, keyboardKey.ArrowUp].includes(key) && this.menuRef.current && open) {
+    // Close dropdown and select first item
+    if (key === keyboardKey.Enter && open && options[0]) {
       evt.preventDefault();
-      if (this.menuRef.current) {
-        const direction = key === keyboardKey.ArrowDown ? 'first' : 'last';
-        const item = this.menuRef.current.querySelector(`.cub-dropdown-item:${direction}-child`);
-        if (item) item.focus();
-      }
+      onSelect(options[0]);
+      this.toggleMenu(false);
+    }
+
+    // Focus first/last item
+    if ([keyboardKey.ArrowDown, keyboardKey.ArrowUp].includes(key) && open) {
+      evt.preventDefault();
+      const $items = this.getItemsElements();
+      const idx = key === keyboardKey.ArrowDown ? 0 : $items.length - 1;
+      // $FlowFixMe
+      if (idx >= 0 && $items[idx]) $items[idx].focus();
     }
   }
 
@@ -158,20 +167,19 @@ class Dropdown extends Component<Props, State> {
     // Focus next/prev item
     if ([keyboardKey.ArrowDown, keyboardKey.ArrowUp].includes(key)) {
       evt.preventDefault();
-      if (this.menuRef.current) {
-        const item =
-          key === keyboardKey.ArrowDown
-            ? target.nextElementSibling || this.menuRef.current.querySelector('.cub-dropdown-item:first-child')
-            : target.previousElementSibling || this.menuRef.current.querySelector('.cub-dropdown-item:last-child');
-        if (item) item.focus();
-      }
+      const $items = Array.from(this.getItemsElements());
+      const currentIdx = $items.indexOf(target);
+      const $next = $items[currentIdx + 1] ? $items[currentIdx + 1] : $items[0];
+      const $prev = $items[currentIdx - 1] ? $items[currentIdx - 1] : $items[$items.length - 1];
+      const $item = key === keyboardKey.ArrowDown ? $next : $prev;
+      if ($item) $item.focus();
     }
 
     this.props.onItemKeyDown(evt);
   }
 
   handleItemClick(evt: SyntheticEvent<HTMLButtonElement>, item: Item): void {
-    this.props.onSelect(evt, item);
+    this.props.onSelect(item);
     if (this.props.closeOnSelect) this.toggleMenu(false);
   }
 
@@ -196,7 +204,6 @@ class Dropdown extends Component<Props, State> {
       disabled,
       customControlProps,
       controlWrapperClassName,
-      onControlChange,
     } = this.props;
     const { open } = this.state;
 
@@ -214,7 +221,6 @@ class Dropdown extends Component<Props, State> {
           autoComplete: 'off',
           className: controlCn,
           onClick: e => this.handleControlClick(e),
-          onChange: e => onControlChange(e),
           onKeyDown: e => this.handleControlKeyDown(e),
         })}
         {customControlArrow && React.createElement(customControlArrow, { open })}
@@ -240,7 +246,10 @@ class Dropdown extends Component<Props, State> {
     const { header } = this.props;
     if (!header) return false;
     return React.createElement(header, {
+      // Close menu from header/footer
       handleClose: () => this.toggleMenu(false),
+      // DropdownItem keyboard navigation
+      handleItemKeyDown: evt => this.handleItemKeyDown(evt),
     });
   }
 
@@ -248,7 +257,10 @@ class Dropdown extends Component<Props, State> {
     const { footer } = this.props;
     if (!footer) return false;
     return React.createElement(footer, {
+      // Close menu from header/footer
       handleClose: () => this.toggleMenu(false),
+      // DropdownItem keyboard navigation
+      handleItemKeyDown: evt => this.handleItemKeyDown(evt),
     });
   }
 
@@ -261,14 +273,14 @@ class Dropdown extends Component<Props, State> {
 
     return (
       <div className={menuCn} ref={this.menuRef}>
-        {this.rennderHeader()}
         {options.length <= 0 && customNoResults}
         {options.length > 0 && (
           <div className="cub-dropdown-menu-inner">
+            {this.rennderHeader()}
             <div className={itemsCn}>{options.map(this.renderOption.bind(this))}</div>
+            {this.rennderFooter()}
           </div>
         )}
-        {this.rennderFooter()}
       </div>
     );
   }

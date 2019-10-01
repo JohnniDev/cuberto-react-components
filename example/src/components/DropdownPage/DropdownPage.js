@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Dropdown } from 'cuberto-react-components';
+import { Dropdown, DropdownItem } from 'cuberto-react-components';
 
 export default class DropdownPage extends Component {
   state = {
@@ -16,7 +16,7 @@ export default class DropdownPage extends Component {
     return options.filter(x => x.name.toLowerCase().includes(term.toLowerCase()));
   }
 
-  onSelect(evt, selected) {
+  onSelect(selected) {
     this.setState({ selected, value: selected.name });
   }
 
@@ -51,15 +51,21 @@ export default class DropdownPage extends Component {
               options={options}
               value={value}
               itemClassName="button"
-              getLabel={x => x.name}
-              getValue={x => x._id}
               customControlProps={{
                 className: 'input',
                 placeholder: 'Base',
+                onChange: (evt, val) => this.onChange(evt, val),
               }}
-              onSelect={(evt, val) => this.onSelect(evt, val)}
-              onControlChange={(evt, val) => this.onChange(evt, val)}
-              footer={({ handleClose }) => <div onClick={handleClose}>footer</div>}
+              onSelect={selected => this.onSelect(selected)}
+              footer={({ handleClose, handleItemKeyDown }) => (
+                <DropdownItem
+                  onClick={handleClose}
+                  onKeyDown={handleItemKeyDown}
+                  className="button"
+                >
+                  Footer
+                </DropdownItem>
+              )}
             />
           </div>
         </div>
