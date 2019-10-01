@@ -274,13 +274,13 @@ class Dropdown extends Component<Props, State> {
     return (
       <div className={menuCn} ref={this.menuRef}>
         {options.length <= 0 && customNoResults}
-        {options.length > 0 && (
           <div className="cub-dropdown-menu-inner">
             {this.rennderHeader()}
-            <div className={itemsCn}>{options.map(this.renderOption.bind(this))}</div>
+            {options.length > 0 && (
+              <div className={itemsCn}>{options.map(this.renderOption.bind(this))}</div>
+            )}
             {this.rennderFooter()}
           </div>
-        )}
       </div>
     );
   }
