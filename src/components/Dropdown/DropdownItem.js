@@ -11,7 +11,7 @@ class DropdownItem extends Component<Props> {
   render() {
     const { children, ...props } = this.props;
     return (
-      <button type="button" {...props}>
+      <button type="button" className="cub-dropdown-item" {...props}>
         {Children.toArray(children)}
       </button>
     );

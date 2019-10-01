@@ -36,7 +36,7 @@ type Props = {
 
   // Other
   closeOnSelect: boolean,
-  noResultsMessage: string,
+  customNoResults: Node,
   footer?: Node,
   header?: Node,
   getLabel: Item => string,
@@ -79,7 +79,7 @@ class Dropdown extends Component<Props, State> {
 
     // Other
     closeOnSelect: true,
-    noResultsMessage: 'No results found.',
+    customNoResults: <div>Nothing found</div>,
     getLabel: x => x.name,
     getValue: x => x._id,
   };
@@ -225,7 +225,7 @@ class Dropdown extends Component<Props, State> {
   }
 
   renderMenu(): Node {
-    const { options, noResultsMessage, header, footer, menuClassName, itemsWrapperClassName } = this.props;
+    const { options, customNoResults, header, footer, menuClassName, itemsWrapperClassName } = this.props;
     const { open } = this.state;
 
     const menuCn = classNames('cub-dropdown-menu', { '-open': open, '-empty': !options.length }, menuClassName);
@@ -234,7 +234,7 @@ class Dropdown extends Component<Props, State> {
     return (
       <div className={menuCn} ref={this.menuRef}>
         {header}
-        {!options.length && noResultsMessage}
+        {options.length <= 0 && customNoResults}
         {options.length > 0 && (
           <div className="cub-dropdown-menu-inner">
             <div className={itemsCn}>{options.map(this.renderOption.bind(this))}</div>
