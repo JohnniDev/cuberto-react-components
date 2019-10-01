@@ -1,17 +1,18 @@
 // @flow
-import React, { Component } from 'react';
+import React, { Component, Children } from 'react';
 import { Item } from './types';
 
 type Props = {
   item: Item,
+  children: Node,
 };
 
 class DropdownItem extends Component<Props> {
   render() {
-    const { item, ...props } = this.props;
+    const { children, ...props } = this.props;
     return (
       <button type="button" {...props}>
-        {item.name}
+        {Children.toArray(children)}
       </button>
     );
   }

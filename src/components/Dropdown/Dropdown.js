@@ -1,9 +1,7 @@
 // @flow
 import React, { Component, createRef, type Node } from 'react';
 import { SyntheticEvent, SyntheticKeyboardEvent, SyntheticInputEvent } from 'react-dom';
-// eslint-disable-next-line import/no-unresolved
 import shallowEqual from 'shallowequal';
-// eslint-disable-next-line import/no-unresolved
 import keyboardKey from 'keyboard-key';
 import classNames from 'classnames';
 import { Item, Value, ClassName } from './types';
@@ -34,10 +32,15 @@ type Props = {
   itemClassName: ClassName,
   onSelect: (evt: SyntheticEvent<HTMLButtonElement>, item: Item) => void,
   onItemKeyDown: (evt: SyntheticKeyboardEvent<HTMLButtonElement>) => void,
+  onClose: () => void,
 
   // Other
   closeOnSelect: boolean,
   noResultsMessage: string,
+  footer?: Node,
+  header?: Node,
+  getLabel: Item => string,
+  getValue: Item => string,
 };
 
 type State = {
@@ -62,9 +65,9 @@ class Dropdown extends Component<Props, State> {
     onControlKeyDown: () => {},
 
     // Menu / Item
-    customItem: ({ item, ...props }) => (
+    customItem: ({ item, getLabel, ...props }) => (
       <DropdownItem item={item} {...props}>
-        {item.name}
+        {getLabel(item)}
       </DropdownItem>
     ),
     menuClassName: '',
@@ -72,10 +75,13 @@ class Dropdown extends Component<Props, State> {
     itemClassName: '',
     onSelect: () => {},
     onItemKeyDown: () => {},
+    onClose: () => {},
 
     // Other
     closeOnSelect: true,
     noResultsMessage: 'No results found.',
+    getLabel: x => x.name,
+    getValue: x => x._id,
   };
 
   constructor(props: Props) {
@@ -101,8 +107,8 @@ class Dropdown extends Component<Props, State> {
   }
 
   getSelectedValue(): Item {
-    const { value, options } = this.props;
-    return (value && options.find(x => x._id === value)) || null;
+    const { value, options, getValue } = this.props;
+    return (value && options.find(x => getValue(x) === value)) || null;
   }
 
   handleControlClick(evt: SyntheticEvent<HTMLButtonElement>): void {
@@ -129,9 +135,12 @@ class Dropdown extends Component<Props, State> {
 
     // Focus first/last item
     if ([keyboardKey.ArrowDown, keyboardKey.ArrowUp].includes(key) && this.menuRef.current && open) {
-      const direction = key === keyboardKey.ArrowDown ? 'first' : 'last';
-      const item = this.menuRef.current.querySelector(`.cub-dropdown-item:${direction}-child`);
-      if (item) item.focus();
+      evt.preventDefault();
+      if (this.menuRef.current) {
+        const direction = key === keyboardKey.ArrowDown ? 'first' : 'last';
+        const item = this.menuRef.current.querySelector(`.cub-dropdown-item:${direction}-child`);
+        if (item) item.focus();
+      }
     }
   }
 
@@ -146,12 +155,15 @@ class Dropdown extends Component<Props, State> {
     }
 
     // Focus next/prev item
-    if ([keyboardKey.ArrowDown, keyboardKey.ArrowUp].includes(key) && this.menuRef.current) {
-      const item =
-        key === keyboardKey.ArrowDown
-          ? target.nextElementSibling || this.menuRef.current.querySelector('.cub-dropdown-item:first-child')
-          : target.previousElementSibling || this.menuRef.current.querySelector('.cub-dropdown-item:last-child');
-      if (item) item.focus();
+    if ([keyboardKey.ArrowDown, keyboardKey.ArrowUp].includes(key)) {
+      evt.preventDefault();
+      if (this.menuRef.current) {
+        const item =
+          key === keyboardKey.ArrowDown
+            ? target.nextElementSibling || this.menuRef.current.querySelector('.cub-dropdown-item:first-child')
+            : target.previousElementSibling || this.menuRef.current.querySelector('.cub-dropdown-item:last-child');
+        if (item) item.focus();
+      }
     }
 
     this.props.onItemKeyDown(evt);
@@ -172,6 +184,7 @@ class Dropdown extends Component<Props, State> {
     const action = open ? 'addEventListener' : 'removeEventListener';
     // $FlowFixMe
     document[action]('click', this.handleOutsideClick, false);
+    if (!open) this.props.onClose();
   }
 
   renderControl(): Node {
@@ -198,20 +211,21 @@ class Dropdown extends Component<Props, State> {
   }
 
   renderOption(item: Item) {
-    const { customItem, itemClassName } = this.props;
+    const { getValue, getLabel, customItem, itemClassName } = this.props;
     const itemCn = classNames('cub-dropdown-item', itemClassName);
     return React.createElement(customItem, {
       item,
-      key: item._id,
+      key: getValue(item),
       selected: this.getSelectedValue(),
       className: itemCn,
+      getLabel,
       onClick: e => this.handleItemClick(e, item),
       onKeyDown: e => this.handleItemKeyDown(e),
     });
   }
 
   renderMenu(): Node {
-    const { options, noResultsMessage, menuClassName, itemsWrapperClassName } = this.props;
+    const { options, noResultsMessage, header, footer, menuClassName, itemsWrapperClassName } = this.props;
     const { open } = this.state;
 
     const menuCn = classNames('cub-dropdown-menu', { '-open': open, '-empty': !options.length }, menuClassName);
@@ -219,12 +233,14 @@ class Dropdown extends Component<Props, State> {
 
     return (
       <div className={menuCn} ref={this.menuRef}>
+        {header}
         {!options.length && noResultsMessage}
         {options.length > 0 && (
           <div className="cub-dropdown-menu-inner">
             <div className={itemsCn}>{options.map(this.renderOption.bind(this))}</div>
           </div>
         )}
+        {footer}
       </div>
     );
   }

@@ -51,10 +51,16 @@ export default class DropdownPage extends Component {
               options={options}
               value={value}
               itemClassName="button"
-              controlClassName="input"
-              placeholder="Base"
+              getLabel={x => x.name}
+              getValue={x => x._id}
+              customControlProps={{
+                className: 'input',
+                placeholder: 'Base',
+              }}
               onSelect={(evt, val) => this.onSelect(evt, val)}
               onControlChange={(evt, val) => this.onChange(evt, val)}
+              header={<div>header</div>}
+              footer={<div>footer</div>}
             />
           </div>
         </div>
