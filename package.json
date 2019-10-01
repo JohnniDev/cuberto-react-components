@@ -1,6 +1,6 @@
 {
   "name": "cuberto-react-components",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Cuberto React Components Library",
   "main": "dist/build.js",
   "repository": {

@@ -22,9 +22,7 @@ type Props = {
   // Control
   customControl: (props: any) => Node,
   controlWrapperClassName: ClassName,
-  controlClassName: ClassName,
-  placeholder: string,
-  tabIndex: string | number,
+  customControlProps: { [key: string]: any },
   onControlClick: (evt: SyntheticEvent<HTMLButtonElement>) => void,
   onControlChange: (evt: SyntheticInputEvent<HTMLInputElement>) => void,
   onControlKeyDown: (evt: SyntheticKeyboardEvent<HTMLInputElement>) => void,
@@ -58,9 +56,7 @@ class Dropdown extends Component<Props, State> {
     // Control
     customControl: ({ ...props }) => <input type="text" {...props} />,
     controlWrapperClassName: '',
-    controlClassName: '',
-    placeholder: 'Select',
-    tabIndex: 1,
+    customControlProps: {},
     onControlClick: () => {},
     onControlChange: () => {},
     onControlKeyDown: () => {},
@@ -179,26 +175,19 @@ class Dropdown extends Component<Props, State> {
   }
 
   renderControl(): Node {
-    const {
-      customControl,
-      value,
-      disabled,
-      tabIndex,
-      placeholder,
-      controlClassName,
-      controlWrapperClassName,
-      onControlChange,
-    } = this.props;
+    const { customControl, value, disabled, customControlProps, controlWrapperClassName, onControlChange } = this.props;
     const controlWrapperCn = classNames('cub-dropdown-control-wrapper', controlWrapperClassName);
-    const controlCn = classNames('cub-dropdown-control', controlClassName);
+    const controlCn = classNames('cub-dropdown-control', customControlProps.className);
+    const defaultProps = { tabIndex: 1, placeholder: 'Select' };
+    const props = { ...defaultProps, ...customControlProps, className: controlCn };
+
     return (
       <div className={controlWrapperCn}>
         {React.createElement(customControl, {
           value,
           disabled,
-          tabIndex,
+          ...props,
           autoComplete: 'off',
-          placeholder,
           className: controlCn,
           onClick: e => this.handleControlClick(e),
           onChange: e => onControlChange(e),
