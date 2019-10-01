@@ -59,8 +59,7 @@ export default class DropdownPage extends Component {
               }}
               onSelect={(evt, val) => this.onSelect(evt, val)}
               onControlChange={(evt, val) => this.onChange(evt, val)}
-              header={<div>header</div>}
-              footer={<div>footer</div>}
+              footer={({ handleClose }) => <div onClick={handleClose}>footer</div>}
             />
           </div>
         </div>

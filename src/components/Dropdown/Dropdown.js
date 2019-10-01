@@ -38,8 +38,8 @@ type Props = {
   // Other
   closeOnSelect: boolean,
   customNoResults: Node,
-  footer?: Node,
-  header?: Node,
+  footer?: (props: any) => Node,
+  header?: (props: any) => Node,
   getLabel: Item => string,
   getValue: Item => string,
 };
@@ -199,6 +199,7 @@ class Dropdown extends Component<Props, State> {
       onControlChange,
     } = this.props;
     const { open } = this.state;
+
     const controlWrapperCn = classNames('cub-dropdown-control-wrapper', controlWrapperClassName);
     const controlCn = classNames('cub-dropdown-control', customControlProps.className);
     const defaultProps = { tabIndex: 1, placeholder: 'Select' };
@@ -235,8 +236,24 @@ class Dropdown extends Component<Props, State> {
     });
   }
 
+  rennderHeader(): Node {
+    const { header } = this.props;
+    if (!header) return false;
+    return React.createElement(header, {
+      handleClose: () => this.toggleMenu(false),
+    });
+  }
+
+  rennderFooter(): Node {
+    const { footer } = this.props;
+    if (!footer) return false;
+    return React.createElement(footer, {
+      handleClose: () => this.toggleMenu(false),
+    });
+  }
+
   renderMenu(): Node {
-    const { options, customNoResults, header, footer, menuClassName, itemsWrapperClassName } = this.props;
+    const { options, customNoResults, menuClassName, itemsWrapperClassName } = this.props;
     const { open } = this.state;
 
     const menuCn = classNames('cub-dropdown-menu', { '-open': open, '-empty': !options.length }, menuClassName);
@@ -244,14 +261,14 @@ class Dropdown extends Component<Props, State> {
 
     return (
       <div className={menuCn} ref={this.menuRef}>
-        {header}
+        {this.rennderHeader()}
         {options.length <= 0 && customNoResults}
         {options.length > 0 && (
           <div className="cub-dropdown-menu-inner">
             <div className={itemsCn}>{options.map(this.renderOption.bind(this))}</div>
           </div>
         )}
-        {footer}
+        {this.rennderFooter()}
       </div>
     );
   }
