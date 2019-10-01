@@ -3,6 +3,7 @@ import React, { Component, createRef, type Node } from 'react';
 import { SyntheticEvent, SyntheticKeyboardEvent, SyntheticInputEvent } from 'react-dom';
 // eslint-disable-next-line import/no-unresolved
 import shallowEqual from 'shallowequal';
+// eslint-disable-next-line import/no-unresolved
 import keyboardKey from 'keyboard-key';
 import classNames from 'classnames';
 import { Item, Value, ClassName } from './types';
@@ -124,8 +125,8 @@ class Dropdown extends Component<Props, State> {
       target.blur();
     }
 
-    // Open dropdown on press spacebar/enter
-    if ([keyboardKey.Spacebar, keyboardKey.Enter].includes(key) && !open) {
+    // Open dropdown on press any key
+    if (!open) {
       evt.preventDefault();
       this.toggleMenu(true);
     }
