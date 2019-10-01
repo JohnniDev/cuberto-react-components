@@ -20,6 +20,7 @@ type Props = {
   // Control
   customControl: (props: any) => Node,
   controlWrapperClassName: ClassName,
+  customControlArrow?: (props: any) => Node,
   customControlProps: { [key: string]: any },
   onControlClick: (evt: SyntheticEvent<HTMLButtonElement>) => void,
   onControlChange: (evt: SyntheticInputEvent<HTMLInputElement>) => void,
@@ -188,7 +189,16 @@ class Dropdown extends Component<Props, State> {
   }
 
   renderControl(): Node {
-    const { customControl, value, disabled, customControlProps, controlWrapperClassName, onControlChange } = this.props;
+    const {
+      customControl,
+      customControlArrow,
+      value,
+      disabled,
+      customControlProps,
+      controlWrapperClassName,
+      onControlChange,
+    } = this.props;
+    const { open } = this.state;
     const controlWrapperCn = classNames('cub-dropdown-control-wrapper', controlWrapperClassName);
     const controlCn = classNames('cub-dropdown-control', customControlProps.className);
     const defaultProps = { tabIndex: 1, placeholder: 'Select' };
@@ -206,6 +216,7 @@ class Dropdown extends Component<Props, State> {
           onChange: e => onControlChange(e),
           onKeyDown: e => this.handleControlKeyDown(e),
         })}
+        {customControlArrow && React.createElement(customControlArrow, { open })}
       </div>
     );
   }
