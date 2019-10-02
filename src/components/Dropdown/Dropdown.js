@@ -259,7 +259,6 @@ class Dropdown extends Component<Props, State> {
           onClick: e => this.handleControlClick(e),
           onKeyDown: e => this.handleControlKeyDown(e),
         })}
-        <span>123</span>
         {customControlArrow && React.createElement(customControlArrow, { open })}
       </div>
     );
