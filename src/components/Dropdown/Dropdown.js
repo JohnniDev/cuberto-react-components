@@ -148,9 +148,11 @@ class Dropdown extends Component<Props, State> {
   }
 
   handleControlKeyDown(evt: SyntheticKeyboardEvent<HTMLInputElement>): void {
-    const { options, onSelect } = this.props;
     const { open } = this.state;
     const key = keyboardKey.getCode(evt);
+    const $items = this.getItemsElements();
+    // $FlowFixMe
+    const $firstItem = $items[0];
 
     // Close dropdown and focusing input
     if (key === keyboardKey.Escape) {
@@ -163,16 +165,16 @@ class Dropdown extends Component<Props, State> {
     }
 
     // Close dropdown and select first item
-    if (key === keyboardKey.Enter && open && options[0]) {
+    if (key === keyboardKey.Enter && open && $firstItem) {
       evt.preventDefault();
-      onSelect(options[0]);
+      $firstItem.focus();
+      $firstItem.click();
       this.toggleMenu(false);
     }
 
     // Focus first/last item
     if ([keyboardKey.ArrowDown, keyboardKey.ArrowUp].includes(key) && open) {
       evt.preventDefault();
-      const $items = this.getItemsElements();
       const idx = key === keyboardKey.ArrowDown ? 0 : $items.length - 1;
       // $FlowFixMe
       if (idx >= 0 && $items[idx]) $items[idx].focus();

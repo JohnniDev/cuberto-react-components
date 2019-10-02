@@ -59,7 +59,10 @@ export default class DropdownPage extends Component {
               onSelect={selected => this.onSelect(selected)}
               footer={({ handleClose, handleItemKeyDown }) => (
                 <DropdownItem
-                  onClick={handleClose}
+                  onClick={() => {
+                    handleClose();
+                    console.log('Footer click!');
+                  }}
                   onKeyDown={handleItemKeyDown}
                   className="button"
                 >
