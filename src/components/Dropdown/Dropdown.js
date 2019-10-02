@@ -23,7 +23,7 @@ type Props = {
   customControl: (props: any) => Node,
   controlWrapperClassName: ClassName,
   customControlArrow?: (props: any) => Node,
-  customControlProps: { [key: string]: any },
+  customControlProps: { [key: string]: any, onKeyDown?: (evt: any) => {}, onClick?: (evt: any) => {} },
   onControlClick: (evt: SyntheticEvent<HTMLButtonElement>) => void,
   onControlKeyDown: (evt: SyntheticKeyboardEvent<HTMLInputElement>) => void,
 
@@ -31,9 +31,8 @@ type Props = {
   customItem: (props: any) => Node,
   menuClassName: ClassName,
   itemsWrapperClassName: ClassName,
-  itemClassName: ClassName,
+  customItemProps: { [key: string]: any, onKeyDown?: (evt: any) => {}, onClick?: (evt: any, item: Item) => {} },
   onSelect: Item => void,
-  onItemKeyDown: (evt: SyntheticKeyboardEvent<HTMLButtonElement>) => void,
   onClose: () => void,
 
   // Other
@@ -75,9 +74,8 @@ class Dropdown extends Component<Props, State> {
     ),
     menuClassName: '',
     itemsWrapperClassName: '',
-    itemClassName: '',
+    customItemProps: {},
     onSelect: () => {},
-    onItemKeyDown: () => {},
     onClose: () => {},
 
     // Other
@@ -183,6 +181,10 @@ class Dropdown extends Component<Props, State> {
       // $FlowFixMe
       if (idx >= 0 && $items[idx]) $items[idx].focus();
     }
+
+    if (this.props.customControlProps.onKeyDown) {
+      this.props.customControlProps.onKeyDown(evt);
+    }
   }
 
   handleItemKeyDown(evt: SyntheticKeyboardEvent<HTMLButtonElement>): void {
@@ -206,13 +208,18 @@ class Dropdown extends Component<Props, State> {
       if ($item) $item.focus();
     }
 
-    this.props.onItemKeyDown(evt);
+    if (this.props.customItemProps.onKeyDown) {
+      this.props.customItemProps.onKeyDown(evt);
+    }
   }
 
   handleItemClick(evt: SyntheticEvent<HTMLButtonElement>, item: Item): void {
     this.props.onSelect(item);
     if (this.props.closeOnSelect) this.toggleMenu(false);
     this.makeFocusOnControl();
+    if (this.props.customItemProps.onClick) {
+      this.props.customItemProps.onClick(evt, item);
+    }
   }
 
   outsideClick(evt: SyntheticEvent<any>): void {
@@ -265,10 +272,11 @@ class Dropdown extends Component<Props, State> {
   }
 
   renderOption(item: Item) {
-    const { getValue, getLabel, customItem, itemClassName } = this.props;
-    const itemCn = classNames('cub-dropdown-item', itemClassName);
+    const { getValue, getLabel, customItem, customItemProps } = this.props;
+    const itemCn = classNames('cub-dropdown-item', customItemProps.className || '');
     return React.createElement(customItem, {
       item,
+      ...customItemProps,
       key: getValue(item),
       selected: this.getSelectedValue(),
       className: itemCn,

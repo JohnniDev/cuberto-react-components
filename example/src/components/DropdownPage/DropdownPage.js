@@ -52,7 +52,9 @@ export default class DropdownPage extends Component {
             <Dropdown
               options={options}
               value={value}
-              itemClassName="button"
+              customItemProps={{
+                className: 'button',
+              }}
               customControlProps={{
                 className: 'input',
                 placeholder: 'Base',
