@@ -38,6 +38,7 @@ type Props = {
 
   // Other
   closeOnSelect: boolean,
+  closeOnControlClick: boolean,
   customNoResults: Node,
   footer?: (props: any) => Node,
   header?: (props: any) => Node,
@@ -81,6 +82,7 @@ class Dropdown extends Component<Props, State> {
 
     // Other
     closeOnSelect: true,
+    closeOnControlClick: true,
     customNoResults: <div>Nothing found</div>,
     getLabel: x => x.name,
     getValue: x => x._id,
@@ -143,7 +145,9 @@ class Dropdown extends Component<Props, State> {
   }
 
   handleControlClick(evt: SyntheticEvent<HTMLButtonElement>): void {
-    if (!this.state.open) this.toggleMenu(true);
+    const { open } = this.state;
+    if (!open) this.toggleMenu(true);
+    if (open && this.props.closeOnControlClick) this.toggleMenu(false);
     this.props.onControlClick(evt);
   }
 
@@ -255,6 +259,7 @@ class Dropdown extends Component<Props, State> {
           onClick: e => this.handleControlClick(e),
           onKeyDown: e => this.handleControlKeyDown(e),
         })}
+        <span>123</span>
         {customControlArrow && React.createElement(customControlArrow, { open })}
       </div>
     );

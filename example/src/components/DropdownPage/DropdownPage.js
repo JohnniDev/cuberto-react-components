@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Dropdown, DropdownItem } from 'cuberto-react-components';
 
+const Arrow = ({ open }) => <span className={open ? '-open' : ''}>&darr;</span>;
+
 export default class DropdownPage extends Component {
   state = {
     options: [],
@@ -56,6 +58,7 @@ export default class DropdownPage extends Component {
                 placeholder: 'Base',
                 onChange: (evt, val) => this.onChange(evt, val),
               }}
+              customControlArrow={Arrow}
               onSelect={selected => this.onSelect(selected)}
               footer={({ handleClose, handleItemKeyDown }) => (
                 <DropdownItem
