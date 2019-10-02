@@ -26,10 +26,10 @@
   },
   "dependencies": {
     "bulma": "^0.7.5",
+    "cuberto-react-components": "file:..",
     "prop-types": "latest",
-    "react": "^16.7.0",
-    "react-dom": "^16.7.0",
-    "react-router-dom": "^5.0.1",
-    "cuberto-react-components": "file:.."
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-router-dom": "^5.0.1"
   }
 }

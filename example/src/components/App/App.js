@@ -5,6 +5,7 @@ import {Router, Switch, Route, Redirect, Link} from 'react-router-dom';
 // Components:
 import Main from "../Main/Main";
 import DropdownPage from "../DropdownPage/DropdownPage";
+import DropdownPageWithHooks from "../DropdownPageWithHooks/DropdownPageWithHooks";
 
 import './App.css';
 
@@ -24,6 +25,7 @@ export default () => (
                             <p className="menu-label">Components</p>
                             <ul className="menu-list">
                                 <li><Link to="/dropdown">Dropdown</Link></li>
+                                <li><Link to="/dropdown-hooks">Dropdown Hooks</Link></li>
                             </ul>
                         </aside>
                     </div>
@@ -32,6 +34,7 @@ export default () => (
                             <Route path="/" exact component={() => <Redirect to={{pathname: '/main'}}/>}/>
                             <Route path="/main" component={Main}/>
                             <Route path="/dropdown" component={DropdownPage}/>
+                            <Route path="/dropdown-hooks" component={DropdownPageWithHooks}/>
                         </Switch>
                     </div>
                 </div>
