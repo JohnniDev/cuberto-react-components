@@ -9,6 +9,8 @@ import DropdownItem from './DropdownItem';
 
 import './Dropdown.css';
 
+const defaultMenuStyles = { top: '100%', bottom: 'auto', visibility: 'hidden' };
+
 type Props = {
   options: Array<Item>,
   value: Value,
@@ -45,6 +47,7 @@ type Props = {
 
 type State = {
   open: boolean,
+  menuStyles: any,
 };
 
 class Dropdown extends Component<Props, State> {
@@ -88,6 +91,7 @@ class Dropdown extends Component<Props, State> {
 
     this.state = {
       open: props.defaultOpen,
+      menuStyles: defaultMenuStyles,
     };
   }
 
@@ -114,25 +118,46 @@ class Dropdown extends Component<Props, State> {
     return (this.menuRef.current && this.menuRef.current.querySelectorAll('.cub-dropdown-item')) || [];
   }
 
+  getControlElement(): HTMLElement | null {
+    return this.dropdownRef.current && this.dropdownRef.current.querySelector('.cub-dropdown-control');
+  }
+
+  makeFocusOnControl(): void {
+    const $control = this.getControlElement();
+    if ($control) $control.focus();
+  }
+
+  setMenuPositions() {
+    const $control = this.getControlElement();
+    const $menu = this.menuRef.current;
+    if ($control && $menu) {
+      const { top, height } = $menu.getBoundingClientRect();
+      const { innerHeight } = window;
+      const menuStyles = {
+        top: top + height > innerHeight ? 'auto' : '100%',
+        bottom: top + height > innerHeight ? '100%' : 'auto',
+        visibility: 'visible',
+      };
+      this.setState({ menuStyles });
+    }
+  }
+
   handleControlClick(evt: SyntheticEvent<HTMLButtonElement>): void {
     if (!this.state.open) this.toggleMenu(true);
     this.props.onControlClick(evt);
   }
 
   handleControlKeyDown(evt: SyntheticKeyboardEvent<HTMLInputElement>): void {
-    const { target } = evt;
     const { options, onSelect } = this.props;
     const { open } = this.state;
     const key = keyboardKey.getCode(evt);
 
-    // Close dropdown and unfocusing input
+    // Close dropdown and focusing input
     if (key === keyboardKey.Escape) {
       this.toggleMenu(false);
-      target.blur();
-    }
-
-    // Open dropdown on press any key
-    if (!open) {
+      if (open) this.makeFocusOnControl();
+    } else if (!open) {
+      // Open dropdown on press any key
       evt.preventDefault();
       this.toggleMenu(true);
     }
@@ -158,10 +183,10 @@ class Dropdown extends Component<Props, State> {
     const { target } = evt;
     const key = keyboardKey.getCode(evt);
 
-    // Close dropdown and unfocusing input
+    // Close dropdown and focus control
     if (key === keyboardKey.Escape) {
       this.toggleMenu(false);
-      // TODO: Сделать фокус на control
+      this.makeFocusOnControl();
     }
 
     // Focus next/prev item
@@ -181,6 +206,7 @@ class Dropdown extends Component<Props, State> {
   handleItemClick(evt: SyntheticEvent<HTMLButtonElement>, item: Item): void {
     this.props.onSelect(item);
     if (this.props.closeOnSelect) this.toggleMenu(false);
+    this.makeFocusOnControl();
   }
 
   outsideClick(evt: SyntheticEvent<any>): void {
@@ -193,7 +219,11 @@ class Dropdown extends Component<Props, State> {
     const action = open ? 'addEventListener' : 'removeEventListener';
     // $FlowFixMe
     document[action]('click', this.handleOutsideClick, false);
-    if (!open) this.props.onClose();
+    if (open) setTimeout(this.setMenuPositions.bind(this));
+    if (!open) {
+      this.props.onClose();
+      this.setState({ menuStyles: defaultMenuStyles });
+    }
   }
 
   renderControl(): Node {
@@ -242,42 +272,33 @@ class Dropdown extends Component<Props, State> {
     });
   }
 
-  rennderHeader(): Node {
-    const { header } = this.props;
-    if (!header) return false;
-    return React.createElement(header, {
+  renderElement(element?: (props: any) => Node): Node {
+    if (!element) return false;
+    return React.createElement(element, {
       // Close menu from header/footer
-      handleClose: () => this.toggleMenu(false),
-      // DropdownItem keyboard navigation
-      handleItemKeyDown: evt => this.handleItemKeyDown(evt),
-    });
-  }
-
-  rennderFooter(): Node {
-    const { footer } = this.props;
-    if (!footer) return false;
-    return React.createElement(footer, {
-      // Close menu from header/footer
-      handleClose: () => this.toggleMenu(false),
+      handleClose: () => {
+        this.toggleMenu(false);
+        this.makeFocusOnControl();
+      },
       // DropdownItem keyboard navigation
       handleItemKeyDown: evt => this.handleItemKeyDown(evt),
     });
   }
 
   renderMenu(): Node {
-    const { options, customNoResults, menuClassName, itemsWrapperClassName } = this.props;
-    const { open } = this.state;
+    const { options, header, footer, customNoResults, menuClassName, itemsWrapperClassName } = this.props;
+    const { open, menuStyles } = this.state;
 
     const menuCn = classNames('cub-dropdown-menu', { '-open': open, '-empty': !options.length }, menuClassName);
     const itemsCn = classNames('cub-dropdown-items', itemsWrapperClassName);
 
     return (
-      <div className={menuCn} ref={this.menuRef}>
+      <div className={menuCn} ref={this.menuRef} style={menuStyles}>
         {options.length <= 0 && customNoResults}
         <div className="cub-dropdown-menu-inner">
-          {this.rennderHeader()}
+          {this.renderElement(header)}
           {options.length > 0 && <div className={itemsCn}>{options.map(this.renderOption.bind(this))}</div>}
-          {this.rennderFooter()}
+          {this.renderElement(footer)}
         </div>
       </div>
     );
