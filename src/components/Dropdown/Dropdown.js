@@ -37,7 +37,7 @@ type Props = {
   customItemProps: {
     [key: string]: any,
     onKeyDown?: (evt: SyntheticKeyboardEvent<HTMLInputElement>) => void,
-    onClick?: (evt: SyntheticEvent<HTMLButtonElement>) => void,
+    onClick?: (evt: SyntheticEvent<HTMLButtonElement>, item: Item) => void,
   },
   onSelect: Item => void,
   onClose: () => void,
@@ -215,7 +215,7 @@ class Dropdown extends Component<Props, State> {
     // Close dropdown and focus control
     if (key === keyboardKey.Escape) {
       this.toggleMenu(false);
-      this.makeFocusOnControl();
+      if (!this.props.openOnFocus) this.makeFocusOnControl();
     }
 
     // Focus next/prev item
@@ -233,10 +233,10 @@ class Dropdown extends Component<Props, State> {
   }
 
   handleItemClick(evt: SyntheticEvent<HTMLButtonElement>, item: Item): void {
-    const { onSelect, closeOnSelect, customItemProps } = this.props;
+    const { onSelect, closeOnSelect, openOnFocus, customItemProps } = this.props;
     onSelect(item);
     if (closeOnSelect) this.toggleMenu(false);
-    this.makeFocusOnControl();
+    if (!openOnFocus) this.makeFocusOnControl();
     if (customItemProps.onClick) customItemProps.onClick(evt, item);
   }
 
@@ -312,7 +312,7 @@ class Dropdown extends Component<Props, State> {
       // Close menu from header/footer
       handleClose: () => {
         this.toggleMenu(false);
-        this.makeFocusOnControl();
+        if (!this.props.openOnFocus) this.makeFocusOnControl();
       },
       // DropdownItem keyboard navigation
       handleItemKeyDown: evt => this.handleItemKeyDown(evt),
