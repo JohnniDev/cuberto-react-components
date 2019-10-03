@@ -37,12 +37,13 @@ type Props = {
 
   // Other
   closeOnSelect: boolean,
+  openOnFocus: boolean,
   closeOnControlClick: boolean,
   customNoResults: Node,
-  footer?: (props: any) => Node,
-  header?: (props: any) => Node,
   getLabel: Item => string,
   getValue: Item => string,
+  footer?: (props: any) => Node,
+  header?: (props: any) => Node,
 };
 
 type State = {
@@ -80,6 +81,7 @@ class Dropdown extends Component<Props, State> {
 
     // Other
     closeOnSelect: true,
+    openOnFocus: false,
     closeOnControlClick: true,
     customNoResults: <div>Nothing found</div>,
     getLabel: x => x.name,
@@ -162,7 +164,6 @@ class Dropdown extends Component<Props, State> {
       if (open) this.makeFocusOnControl();
     } else if (!open) {
       // Open dropdown on press any key
-      evt.preventDefault();
       this.toggleMenu(true);
     }
 
@@ -184,6 +185,14 @@ class Dropdown extends Component<Props, State> {
 
     if (this.props.customControlProps.onKeyDown) {
       this.props.customControlProps.onKeyDown(evt);
+    }
+  }
+
+  handleControlFocus(evt: SyntheticEvent<HTMLInputElement>): void {
+    const { openOnFocus, customControlProps } = this.props;
+    if (openOnFocus) this.toggleMenu(true);
+    if (customControlProps.onFocus) {
+      customControlProps.onFocus(evt);
     }
   }
 
@@ -265,6 +274,7 @@ class Dropdown extends Component<Props, State> {
           className: controlCn,
           onClick: e => this.handleControlClick(e),
           onKeyDown: e => this.handleControlKeyDown(e),
+          onFocus: e => this.handleControlFocus(e),
         })}
         {customControlArrow && React.createElement(customControlArrow, { open })}
       </div>

@@ -52,6 +52,7 @@ export default class DropdownPage extends Component {
             <Dropdown
               options={options}
               value={value}
+              openOnFocus={true}
               customItemProps={{
                 className: 'button',
               }}
