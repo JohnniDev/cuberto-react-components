@@ -27,18 +27,24 @@ type Props = {
     [key: string]: any,
     onKeyDown?: (evt: SyntheticKeyboardEvent<HTMLInputElement>) => void,
     onClick?: (evt: SyntheticEvent<HTMLButtonElement>) => void,
+    onBlur?: (evt: SyntheticEvent<HTMLButtonElement>) => void,
   },
 
   // Menu / Item
   customItem: (props: any) => Node,
   menuClassName: ClassName,
   itemsWrapperClassName: ClassName,
-  customItemProps: { [key: string]: any, onKeyDown?: (evt: any) => {}, onClick?: (evt: any, item: Item) => {} },
+  customItemProps: {
+    [key: string]: any,
+    onKeyDown?: (evt: SyntheticKeyboardEvent<HTMLInputElement>) => void,
+    onClick?: (evt: SyntheticEvent<HTMLButtonElement>) => void,
+  },
   onSelect: Item => void,
   onClose: () => void,
 
   // Other
   closeOnSelect: boolean,
+  closeOnBlur: boolean,
   openOnFocus: boolean,
   closeOnControlClick: boolean,
   customNoResults: Node,
@@ -81,6 +87,7 @@ class Dropdown extends Component<Props, State> {
 
     // Other
     closeOnSelect: true,
+    closeOnBlur: false,
     openOnFocus: false,
     closeOnControlClick: true,
     customNoResults: <div>Nothing found</div>,
@@ -156,6 +163,12 @@ class Dropdown extends Component<Props, State> {
     const { openOnFocus, customControlProps } = this.props;
     if (openOnFocus) this.toggleMenu(true);
     if (customControlProps.onFocus) customControlProps.onFocus(evt);
+  }
+
+  handleControlBlur(evt: SyntheticEvent<HTMLInputElement>): void {
+    const { closeOnBlur, customControlProps } = this.props;
+    if (closeOnBlur) this.toggleMenu(false);
+    if (customControlProps.onBlur) customControlProps.onBlur(evt);
   }
 
   handleControlKeyDown(evt: SyntheticKeyboardEvent<HTMLInputElement>): void {
@@ -271,6 +284,7 @@ class Dropdown extends Component<Props, State> {
           onClick: e => this.handleControlClick(e),
           onKeyDown: e => this.handleControlKeyDown(e),
           onFocus: e => this.handleControlFocus(e),
+          onBlur: e => this.handleControlBlur(e),
         })}
         {customControlArrow && React.createElement(customControlArrow, { open })}
       </div>
