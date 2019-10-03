@@ -23,9 +23,11 @@ type Props = {
   customControl: (props: any) => Node,
   controlWrapperClassName: ClassName,
   customControlArrow?: (props: any) => Node,
-  customControlProps: { [key: string]: any, onKeyDown?: (evt: any) => {}, onClick?: (evt: any) => {} },
-  onControlClick: (evt: SyntheticEvent<HTMLButtonElement>) => void,
-  onControlKeyDown: (evt: SyntheticKeyboardEvent<HTMLInputElement>) => void,
+  customControlProps: {
+    [key: string]: any,
+    onKeyDown?: (evt: SyntheticKeyboardEvent<HTMLInputElement>) => void,
+    onClick?: (evt: SyntheticEvent<HTMLButtonElement>) => void,
+  },
 
   // Menu / Item
   customItem: (props: any) => Node,
@@ -64,8 +66,6 @@ class Dropdown extends Component<Props, State> {
     customControl: ({ ...props }) => <input type="text" {...props} />,
     controlWrapperClassName: '',
     customControlProps: {},
-    onControlClick: () => {},
-    onControlKeyDown: () => {},
 
     // Menu / Item
     customItem: ({ item, getLabel, ...props }) => (
@@ -146,13 +146,21 @@ class Dropdown extends Component<Props, State> {
 
   handleControlClick(evt: SyntheticEvent<HTMLButtonElement>): void {
     const { open } = this.state;
+    const { closeOnControlClick, customControlProps, openOnFocus } = this.props;
     if (!open) this.toggleMenu(true);
-    if (open && this.props.closeOnControlClick) this.toggleMenu(false);
-    this.props.onControlClick(evt);
+    if (open && closeOnControlClick && !openOnFocus) this.toggleMenu(false);
+    if (customControlProps.onClick) customControlProps.onClick(evt);
+  }
+
+  handleControlFocus(evt: SyntheticEvent<HTMLInputElement>): void {
+    const { openOnFocus, customControlProps } = this.props;
+    if (openOnFocus) this.toggleMenu(true);
+    if (customControlProps.onFocus) customControlProps.onFocus(evt);
   }
 
   handleControlKeyDown(evt: SyntheticKeyboardEvent<HTMLInputElement>): void {
     const { open } = this.state;
+    const { customControlProps } = this.props;
     const key = keyboardKey.getCode(evt);
     const $items = this.getItemsElements();
     // $FlowFixMe
@@ -183,21 +191,12 @@ class Dropdown extends Component<Props, State> {
       if (idx >= 0 && $items[idx]) $items[idx].focus();
     }
 
-    if (this.props.customControlProps.onKeyDown) {
-      this.props.customControlProps.onKeyDown(evt);
-    }
-  }
-
-  handleControlFocus(evt: SyntheticEvent<HTMLInputElement>): void {
-    const { openOnFocus, customControlProps } = this.props;
-    if (openOnFocus) this.toggleMenu(true);
-    if (customControlProps.onFocus) {
-      customControlProps.onFocus(evt);
-    }
+    if (customControlProps.onKeyDown) customControlProps.onKeyDown(evt);
   }
 
   handleItemKeyDown(evt: SyntheticKeyboardEvent<HTMLButtonElement>): void {
     const { target } = evt;
+    const { customItemProps } = this.props;
     const key = keyboardKey.getCode(evt);
 
     // Close dropdown and focus control
@@ -217,18 +216,15 @@ class Dropdown extends Component<Props, State> {
       if ($item) $item.focus();
     }
 
-    if (this.props.customItemProps.onKeyDown) {
-      this.props.customItemProps.onKeyDown(evt);
-    }
+    if (customItemProps.onKeyDown) customItemProps.onKeyDown(evt);
   }
 
   handleItemClick(evt: SyntheticEvent<HTMLButtonElement>, item: Item): void {
-    this.props.onSelect(item);
-    if (this.props.closeOnSelect) this.toggleMenu(false);
+    const { onSelect, closeOnSelect, customItemProps } = this.props;
+    onSelect(item);
+    if (closeOnSelect) this.toggleMenu(false);
     this.makeFocusOnControl();
-    if (this.props.customItemProps.onClick) {
-      this.props.customItemProps.onClick(evt, item);
-    }
+    if (customItemProps.onClick) customItemProps.onClick(evt, item);
   }
 
   outsideClick(evt: SyntheticEvent<any>): void {
