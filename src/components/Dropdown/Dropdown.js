@@ -191,13 +191,8 @@ class Dropdown extends Component<Props, State> {
     // Close dropdown and select first item
     if (key === keyboardKey.Enter && open && $firstItem) {
       evt.preventDefault();
-      const firstOption = this.props.options[0];
-      if (firstOption) {
-        this.handleItemClick(evt, firstOption, 0);
-      } else {
-        const customEvent = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
-        $firstItem.dispatchEvent(customEvent);
-      }
+      const customEvent = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+      $firstItem.dispatchEvent(customEvent);
       this.toggleMenu(false);
     }
 
@@ -214,13 +209,19 @@ class Dropdown extends Component<Props, State> {
 
   handleItemKeyDown(evt: SyntheticKeyboardEvent<HTMLButtonElement>, item: Item, idx: number): void {
     const { target } = evt;
-    const { customItemProps } = this.props;
+    const { customItemProps, onSelect } = this.props;
     const key = keyboardKey.getCode(evt);
 
     // Close dropdown and focus control
     if (key === keyboardKey.Escape) {
       this.toggleMenu(false);
       if (!this.props.openOnFocus) this.makeFocusOnControl();
+    }
+
+    // Select item
+    if (key === keyboardKey.Enter) {
+      onSelect(evt, item, idx);
+      this.toggleMenu(false);
     }
 
     // Focus next/prev item
