@@ -219,7 +219,7 @@ class Dropdown extends Component<Props, State> {
     }
 
     // Select item
-    if (key === keyboardKey.Enter) {
+    if (key === keyboardKey.Enter && item !== null) {
       onSelect(evt, item, idx);
       this.toggleMenu(false);
     }
