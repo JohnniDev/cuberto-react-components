@@ -18,7 +18,8 @@ export default class DropdownPage extends Component {
     return options.filter(x => x.name.toLowerCase().includes(term.toLowerCase()));
   }
 
-  onSelect(selected) {
+  onSelect(evt, selected) {
+    console.log(evt);
     this.setState({ selected, value: selected.name });
   }
 
@@ -62,14 +63,17 @@ export default class DropdownPage extends Component {
                 onChange: (evt, val) => this.onChange(evt, val),
               }}
               customControlArrow={Arrow}
-              onSelect={selected => this.onSelect(selected)}
+              onSelect={this.onSelect.bind(this)}
               footer={({ handleClose, handleItemKeyDown }) => (
                 <DropdownItem
                   onClick={() => {
                     handleClose();
                     console.log('Footer click!');
                   }}
-                  onKeyDown={handleItemKeyDown}
+                  onKeyDown={e => {
+                    handleItemKeyDown(e);
+                    console.log('Footer enter!');
+                  }}
                   className="button"
                 >
                   Footer
