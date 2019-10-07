@@ -1,5 +1,6 @@
 // @flow
 import React, { Component, createRef, type Node } from 'react';
+// eslint-disable-next-line import/no-unresolved
 import { SyntheticEvent, SyntheticKeyboardEvent } from 'react-dom';
 import shallowEqual from 'shallowequal';
 import keyboardKey from 'keyboard-key';
@@ -44,7 +45,6 @@ type Props = {
 
   // Other
   closeOnSelect: boolean,
-  closeOnBlur: boolean,
   openOnFocus: boolean,
   closeOnControlClick: boolean,
   customNoResults: Node,
@@ -87,7 +87,6 @@ class Dropdown extends Component<Props, State> {
 
     // Other
     closeOnSelect: true,
-    closeOnBlur: false,
     openOnFocus: false,
     closeOnControlClick: true,
     customNoResults: <div>Nothing found</div>,
@@ -166,8 +165,7 @@ class Dropdown extends Component<Props, State> {
   }
 
   handleControlBlur(evt: SyntheticEvent<HTMLInputElement>): void {
-    const { closeOnBlur, customControlProps } = this.props;
-    if (closeOnBlur) this.toggleMenu(false);
+    const { customControlProps } = this.props;
     if (customControlProps.onBlur) customControlProps.onBlur(evt);
   }
 
@@ -179,11 +177,13 @@ class Dropdown extends Component<Props, State> {
     // $FlowFixMe
     const $firstItem = $items[0];
 
+    if (key === keyboardKey.Tab) this.toggleMenu(false);
+
     // Close dropdown and focusing input
     if (key === keyboardKey.Escape) {
       this.toggleMenu(false);
       if (open) this.makeFocusOnControl();
-    } else if (!open) {
+    } else if (!open && key !== keyboardKey.Tab) {
       // Open dropdown on press any key
       this.toggleMenu(true);
     }
@@ -212,6 +212,8 @@ class Dropdown extends Component<Props, State> {
     const { customItemProps, onSelect } = this.props;
     const key = keyboardKey.getCode(evt);
 
+    if (key === keyboardKey.Tab) this.toggleMenu(false);
+
     // Close dropdown and focus control
     if (key === keyboardKey.Escape) {
       this.toggleMenu(false);
@@ -220,6 +222,7 @@ class Dropdown extends Component<Props, State> {
 
     // Select item
     if (key === keyboardKey.Enter && item !== null) {
+      evt.preventDefault();
       onSelect(evt, item, idx);
       this.toggleMenu(false);
     }

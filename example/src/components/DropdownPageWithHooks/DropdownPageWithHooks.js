@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { Dropdown, DropdownItem, useDropdown } from 'cuberto-react-components';
+import useDropdown from '../../hooks/useDropdown';
+import { Dropdown, DropdownItem } from 'cuberto-react-components';
 
 export default function DropdownPageWithHooks() {
   const dropdown = useDropdown([], '', null);
@@ -16,7 +17,10 @@ export default function DropdownPageWithHooks() {
     return options.filter(x => x.name.toLowerCase().includes(term.toLowerCase()));
   };
 
-  const onSelect = selected => {
+  const onSelect = (evt, selected) => {
+    dropdown.setValue(selected.name);
+    dropdown.setValue(selected.name);
+    dropdown.setValue(selected.name);
     dropdown.setValue(selected.name);
     dropdown.setSelected(selected);
   };
@@ -49,7 +53,7 @@ export default function DropdownPageWithHooks() {
               placeholder: 'Base',
               onChange: (evt, val) => onChange(evt, val),
             }}
-            onSelect={selected => onSelect(selected)}
+            onSelect={onSelect}
             footer={({ handleClose, handleItemKeyDown }) => (
               <DropdownItem
                 onClick={() => {

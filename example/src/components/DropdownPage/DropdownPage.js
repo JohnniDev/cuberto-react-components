@@ -5,7 +5,7 @@ const Arrow = ({ open }) => <span className={open ? '-open' : ''}>&darr;</span>;
 
 export default class DropdownPage extends Component {
   state = {
-    options: [],
+    options: this.getOptions(),
     value: '',
     selected: null,
   };
@@ -19,7 +19,6 @@ export default class DropdownPage extends Component {
   }
 
   onSelect(evt, selected) {
-    console.log(evt);
     this.setState({ selected, value: selected.name });
   }
 
@@ -43,7 +42,6 @@ export default class DropdownPage extends Component {
         </div>
 
         <div className="is-padding-bottom">
-          <button type="button" className="button" onClick={() => this.setState({ options: this.getOptions() })}>Set options</button> &nbsp;
           <button type="button" className="button" onClick={() => this.setState({ options: this.getOptions(), value: '', selected: null })}>Clear</button> &nbsp;
         </div>
 
@@ -66,13 +64,10 @@ export default class DropdownPage extends Component {
               onSelect={this.onSelect.bind(this)}
               footer={({ handleClose, handleItemKeyDown }) => (
                 <DropdownItem
-                  onClick={() => {
-                    handleClose();
-                    console.log('Footer click!');
-                  }}
-                  onKeyDown={e => {
-                    handleItemKeyDown(e);
-                    console.log('Footer enter!');
+                  onClick={handleClose}
+                  onKeyDown={evt => {
+                    evt.preventDefault();
+                    handleItemKeyDown(evt);
                   }}
                   className="button"
                 >
@@ -84,7 +79,7 @@ export default class DropdownPage extends Component {
         </div>
 
         <div className="panel is-padding-bottom">
-          <p className="panel-heading">Options</p>
+          <p className="panel-heading">Selected</p>
           <div className="panel-block">
             <pre>{JSON.stringify(selected, null, 4)}</pre>
           </div>
