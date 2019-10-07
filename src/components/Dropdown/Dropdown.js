@@ -279,7 +279,7 @@ class Dropdown extends Component<Props, State> {
 
     const controlWrapperCn = classNames('cub-dropdown-control-wrapper', controlWrapperClassName);
     const controlCn = classNames('cub-dropdown-control', customControlProps.className);
-    const defaultProps = { tabIndex: 1, placeholder: 'Select' };
+    const defaultProps = { placeholder: 'Select' };
     const props = { ...defaultProps, ...customControlProps, className: controlCn };
 
     return (
