@@ -309,6 +309,8 @@ class Dropdown extends Component<Props, State> {
       key: getValue(item),
       selected: this.getSelectedValue(),
       className: itemCn,
+      'data-label': getLabel(item),
+      'data-value': getValue(item),
       getLabel,
       onClick: e => this.handleItemClick(e, item, idx),
       onKeyDown: e => this.handleItemKeyDown(e, item, idx),
