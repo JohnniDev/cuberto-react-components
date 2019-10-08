@@ -74,6 +74,8 @@ export default class DropdownPage extends Component {
                   Footer
                 </DropdownItem>
               )}
+              onOpen={() => console.log('menu opened')}
+              onClose={() => console.log('menu closed')}
             />
           </div>
         </div>

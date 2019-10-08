@@ -42,6 +42,7 @@ type Props = {
   },
   onSelect: (evt: SyntheticEvent<HTMLButtonElement>, item: Item, idx: number) => void,
   onClose: () => void,
+  onOpen: () => void,
 
   // Other
   closeOnSelect: boolean,
@@ -84,6 +85,7 @@ class Dropdown extends Component<Props, State> {
     customItemProps: {},
     onSelect: () => {},
     onClose: () => {},
+    onOpen: () => {},
 
     // Other
     closeOnSelect: true,
@@ -259,8 +261,10 @@ class Dropdown extends Component<Props, State> {
     const action = open ? 'addEventListener' : 'removeEventListener';
     // $FlowFixMe
     document[action]('click', this.handleOutsideClick, false);
-    if (open) setTimeout(this.setMenuPositions.bind(this));
-    if (!open) {
+    if (open) {
+      this.props.onOpen();
+      setTimeout(this.setMenuPositions.bind(this));
+    } else {
       this.props.onClose();
       this.setState({ menuStyles: defaultMenuStyles });
     }
