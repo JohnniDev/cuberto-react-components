@@ -45,7 +45,6 @@ type Props = {
   onOpen: () => void,
 
   // Other
-  isOpened: boolean,
   closeOnSelect: boolean,
   openOnFocus: boolean,
   closeOnControlClick: boolean,
@@ -89,7 +88,6 @@ class Dropdown extends Component<Props, State> {
     onOpen: () => {},
 
     // Other
-    isOpened: null,
     closeOnSelect: true,
     openOnFocus: false,
     closeOnControlClick: true,
@@ -102,7 +100,7 @@ class Dropdown extends Component<Props, State> {
     super(props);
 
     this.state = {
-      open: props.isOpened || props.defaultOpen,
+      open: props.defaultOpen,
       menuStyles: defaultMenuStyles,
     };
   }
@@ -119,10 +117,6 @@ class Dropdown extends Component<Props, State> {
 
   shouldComponentUpdate(nextProps: Props, nextState: State) {
     return !shallowEqual(nextProps, this.props) || !shallowEqual(nextState, this.state);
-  }
-
-  componentWillReceiveProps(nextProps: Props): * {
-    this.toggleMenu(nextProps.isOpened)
   }
 
   getSelectedValue(): Item {
@@ -201,7 +195,7 @@ class Dropdown extends Component<Props, State> {
       evt.preventDefault();
       const customEvent = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
       $firstItem.dispatchEvent(customEvent);
-      if(this.props.closeOnSelect) this.toggleMenu(false);
+      this.toggleMenu(false);
     }
 
     // Focus first/last item
@@ -232,7 +226,7 @@ class Dropdown extends Component<Props, State> {
     if (key === keyboardKey.Enter && item !== null) {
       evt.preventDefault();
       onSelect(evt, item, idx);
-      if(this.props.closeOnSelect) this.toggleMenu(false);
+      this.toggleMenu(false);
     }
 
     // Focus next/prev item
