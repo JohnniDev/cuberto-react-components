@@ -195,7 +195,7 @@ class Dropdown extends Component<Props, State> {
       evt.preventDefault();
       const customEvent = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
       $firstItem.dispatchEvent(customEvent);
-      // this.toggleMenu(false);
+      this.toggleMenu(false);
     }
 
     // Focus first/last item
@@ -226,6 +226,7 @@ class Dropdown extends Component<Props, State> {
     if (key === keyboardKey.Enter && item !== null) {
       evt.preventDefault();
       onSelect(evt, item, idx);
+      this.toggleMenu(false);
     }
 
     // Focus next/prev item
