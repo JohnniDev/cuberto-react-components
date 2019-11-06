@@ -8,6 +8,7 @@ export default class DropdownPage extends Component {
     options: this.getOptions(),
     value: '',
     selected: null,
+    isOpened: false
   };
 
   getOptions(term = '') {
@@ -19,13 +20,15 @@ export default class DropdownPage extends Component {
   }
 
   onSelect(evt, selected) {
-    this.setState({ selected, value: selected.name });
+    this.setState({ selected, value: selected.name});
   }
 
   onChange(evt) {
     const { value } = evt.target;
     this.setState({ value, options: this.getOptions(value) });
   }
+
+  toggleMenu = (flag) => this.setState({isOpened: flag})
 
   render() {
     const { options, value, selected } = this.state;
@@ -45,6 +48,8 @@ export default class DropdownPage extends Component {
           <button type="button" className="button" onClick={() => this.setState({ options: this.getOptions(), value: '', selected: null })}>Clear</button> &nbsp;
         </div>
 
+        <input type="button" onClick={() => this.toggleMenu(!this.state.isOpened)}/>
+
         <div className="panel is-padding-bottom">
           <p className="panel-heading">Base</p>
           <div className="panel-block">
@@ -61,6 +66,8 @@ export default class DropdownPage extends Component {
                 onChange: (evt, val) => this.onChange(evt, val),
               }}
               customControlArrow={Arrow}
+              closeOnSelect={false}
+              isOpened={this.state.isOpened}
               onSelect={this.onSelect.bind(this)}
               footer={({ handleClose, handleItemKeyDown }) => (
                 <DropdownItem
@@ -74,8 +81,16 @@ export default class DropdownPage extends Component {
                   Footer
                 </DropdownItem>
               )}
-              onOpen={() => console.log('menu opened')}
-              onClose={() => console.log('menu closed')}
+              onOpen={() => {
+                if (!this.state.isOpened) {
+                  this.setState({isOpened: true})
+                }
+              }}
+              onClose={() => {
+                if(this.state.isOpened) {
+                  this.setState({isOpened: false})
+                }
+              }}
             />
           </div>
         </div>
