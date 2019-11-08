@@ -212,7 +212,7 @@ class Dropdown extends Component<Props, State> {
     const { target } = evt;
     const { customItemProps, onSelect } = this.props;
     const key = keyboardKey.getCode(evt);
-    const isPromise = obj => typeof obj.then === 'function'
+    const isPromise = obj => typeof obj.then === 'function';
 
     if (key === keyboardKey.Tab) this.toggleMenu(false);
 
@@ -226,7 +226,7 @@ class Dropdown extends Component<Props, State> {
     if (key === keyboardKey.Enter && item !== null) {
       evt.preventDefault();
 
-      if(isPromise(onSelect)) {
+      if (isPromise(onSelect)) {
         onSelect(evt, item, idx).then(() => this.toggleMenu(false));
       } else {
         onSelect(evt, item, idx);
