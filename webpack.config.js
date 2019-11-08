@@ -5,12 +5,12 @@ const env = process.env.NODE_ENV;
 module.exports = {
   entry: './src/index.js',
   mode: env,
-  resolve: {
-    alias: {
-      'react': path.resolve('./example/node_modules/react'),
-      'react-dom': path.resolve(__dirname, './example/node_modules/react-dom'),
-    },
-  },
+  // resolve: {
+  //   alias: {
+  //     'react': path.resolve('./example/node_modules/react'),
+  //     'react-dom': path.resolve(__dirname, './example/node_modules/react-dom'),
+  //   },
+  // },
   module: {
     rules: [
       {
