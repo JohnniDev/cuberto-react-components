@@ -11,7 +11,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "setup": "npm install && npm run build && npm install . -g && npm link && cd example && npm install && npm link cuberto-react-components",
     "start": "cross-env NODE_ENV=development webpack",
-    "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "build": "cross-env NODE_ENV=production webpack",
     "flow": "flow",
     "lint": "./node_modules/.bin/eslint"
   },
@@ -44,17 +44,17 @@
     "webpack": "^4.28.3",
     "webpack-cli": "^3.2.0",
     "webpack-dev-server": "^3.8.1",
-    "react": "16.8.6",
-    "react-dom": "16.8.6",
-    "classnames": "^2.2.6"
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
   },
   "dependencies": {
+    "classnames": "^2.2.6",
+    "keyboard-key": "^1.0.4",
     "prop-types": "latest",
     "shallowequal": "^1.1.0"
   },
   "peerDependencies": {
     "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "classnames": "^2.2.6"
+    "react-dom": "^16.8.6"
   }
 }

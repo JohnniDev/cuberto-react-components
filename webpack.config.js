@@ -27,35 +27,11 @@ module.exports = {
     ],
   },
   output: {
-    library: 'CubertoReactComponents',
     path: path.resolve(__dirname, 'dist/'),
     publicPath: '',
     filename: 'build.js',
     libraryTarget: 'umd',
   },
-  externals: [
-    {
-      classnames: {
-        root: 'classnames',
-        commonjs: 'classnames',
-        commonjs2: 'classnames',
-      },
-    },
-    {
-      react: {
-        root: 'React',
-        commonjs: 'react',
-        commonjs2: 'react',
-      },
-    },
-    {
-      'react-dom': {
-        root: 'ReactDOM',
-        commonjs: 'react-dom',
-        commonjs2: 'react-dom',
-      },
-    },
-  ],
   watch: env === 'development',
   devtool: env === 'development' ? 'eval-source-map' : false,
 };
