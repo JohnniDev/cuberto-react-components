@@ -3,7 +3,6 @@ import React, { Component, createRef, type Node } from 'react';
 // eslint-disable-next-line import/no-unresolved
 import { SyntheticEvent, SyntheticKeyboardEvent } from 'react-dom';
 import shallowEqual from 'shallowequal';
-import keyboardKey from 'keyboard-key';
 import classNames from 'classnames';
 import { Item, Value, ClassName } from './types';
 import DropdownItem from './DropdownItem';
@@ -174,33 +173,33 @@ class Dropdown extends Component<Props, State> {
   handleControlKeyDown(evt: SyntheticKeyboardEvent<HTMLInputElement>): void {
     const { open } = this.state;
     const { customControlProps } = this.props;
-    const key = keyboardKey.getCode(evt);
+    const { key } = evt;
     const $items = this.getItemsElements();
     // $FlowFixMe
     const $firstItem = $items[0];
 
-    if (key === keyboardKey.Tab) this.toggleMenu(false);
+    if (key === 'Tab') this.toggleMenu(false);
 
     // Close dropdown and focusing input
-    if (key === keyboardKey.Escape) {
+    if (key === 'Escape') {
       this.toggleMenu(false);
       if (open) this.makeFocusOnControl();
-    } else if (!open && key !== keyboardKey.Tab) {
+    } else if (!open && key !== 'Tab') {
       // Open dropdown on press any key
       this.toggleMenu(true);
     }
 
     // Close dropdown and select first item
-    if (key === keyboardKey.Enter && open && $firstItem) {
+    if (key === 'Enter' && open && $firstItem) {
       evt.preventDefault();
       const customEvent = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
       $firstItem.dispatchEvent(customEvent);
     }
 
     // Focus first/last item
-    if ([keyboardKey.ArrowDown, keyboardKey.ArrowUp].includes(key) && open) {
+    if (['ArrowDown', 'ArrowUp'].includes(key) && open) {
       evt.preventDefault();
-      const idx = key === keyboardKey.ArrowDown ? 0 : $items.length - 1;
+      const idx = key === 'ArrowDown' ? 0 : $items.length - 1;
       // $FlowFixMe
       if (idx >= 0 && $items[idx]) $items[idx].focus();
     }
@@ -209,21 +208,20 @@ class Dropdown extends Component<Props, State> {
   }
 
   handleItemKeyDown(evt: SyntheticKeyboardEvent<HTMLButtonElement>, item: Item, idx: number): void {
-    const { target } = evt;
+    const { target, key } = evt;
     const { customItemProps, onSelect } = this.props;
-    const key = keyboardKey.getCode(evt);
     const isPromise = obj => typeof obj.then === 'function';
 
-    if (key === keyboardKey.Tab) this.toggleMenu(false);
+    if (key === 'Tab') this.toggleMenu(false);
 
     // Close dropdown and focus control
-    if (key === keyboardKey.Escape) {
+    if (key === 'Escape') {
       this.toggleMenu(false);
       if (!this.props.openOnFocus) this.makeFocusOnControl();
     }
 
     // Select item
-    if (key === keyboardKey.Enter && item !== null) {
+    if (key === 'Enter' && item !== null) {
       evt.preventDefault();
 
       if (isPromise(onSelect)) {
@@ -235,13 +233,13 @@ class Dropdown extends Component<Props, State> {
     }
 
     // Focus next/prev item
-    if ([keyboardKey.ArrowDown, keyboardKey.ArrowUp].includes(key)) {
+    if (['ArrowDown', 'ArrowUp'].includes(key)) {
       evt.preventDefault();
       const $items = Array.from(this.getItemsElements());
       const currentIdx = $items.indexOf(target);
       const $next = $items[currentIdx + 1] ? $items[currentIdx + 1] : $items[0];
       const $prev = $items[currentIdx - 1] ? $items[currentIdx - 1] : $items[$items.length - 1];
-      const $item = key === keyboardKey.ArrowDown ? $next : $prev;
+      const $item = key === 'ArrowDown' ? $next : $prev;
       if ($item) $item.focus();
     }
 
