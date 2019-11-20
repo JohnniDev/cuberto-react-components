@@ -33,6 +33,9 @@ module.exports = {
     filename: 'build.js',
     libraryTarget: 'umd',
   },
+  optimization: {
+    minimize: false
+  },
   externals: [
     {
       classnames: {
