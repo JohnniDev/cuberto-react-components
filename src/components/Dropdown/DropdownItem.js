@@ -10,6 +10,10 @@ type Props = {
 };
 
 class DropdownItem extends Component<Props> {
+  constructor(props: Props) {
+    super(props);
+  }
+
   render() {
     const { children, className, ...props } = this.props;
     const buttonCn = classNames(className, 'cub-dropdown-item');

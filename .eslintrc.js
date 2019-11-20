@@ -65,5 +65,6 @@ module.exports = {
     'no-underscore-dangle': 0,
     'quotes': ['error', 'single'],
     'default-case': 0,
+    'no-useless-constructor': 0
   },
 };
